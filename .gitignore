@@ -1,0 +1,7 @@
+.terraform*
+terraform_test
+awscliv2.zip
+installs.sh
+aws
+terraform/.terraform*
+terraform/terraform.tfstate*
