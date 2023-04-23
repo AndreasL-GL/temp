@@ -3,7 +3,7 @@ version: '3.8'
 services:
   api:
     build: ./api
-    command: gunicorn --bind 0.0.0.0:5000 app:app
+    command: gunicorn --bind 0.0.0.0:80 app:app
     volumes: 
     - ./website:/usr/src/app/
     ports:
@@ -14,7 +14,7 @@ services:
       - VIRTUAL_HOST=your_domain
       - LETSENCRYPT_HOST=your_domain
     ports:
-      - 7009:7009
+      - 80:80
       - 443:443
     depends_on:
       - api
