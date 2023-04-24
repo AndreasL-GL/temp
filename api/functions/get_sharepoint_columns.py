@@ -40,7 +40,7 @@ class SharepointColumns():
         kontrollpunkter_from_link = [x.split(',')[0] if ',' in x else x for x in kontrollpunkter_from_link]
         resultdict = SharepointColumns.levenshtein_dictionary(kontrollmoment,kontrollpunkter_from_link)
         resultdict = {key: list(body.keys())[kontrollpunkter_from_link.index(value)] for key,value in resultdict.items()}
-        if "Vårsopning" in resultdict.keys(): resultdict["Vårsopning"] = "Vårsopning".replace('å','_x00e5_')
+        if "Vårsopning" in resultdict.keys(): resultdict["Vårsopning"] = "V_x00e5_rsopning"
         elif "Rensa öppna rännor" in resultdict.keys(): resultdict["Rensa öppna rännor"] = "Rensa_x00f6_ppnar_x00e4_nnor"
         elif "Rensa stängda rännor" in resultdict.keys(): resultdict["Rensa stängda rännor"] = "Rensast_x00e4_ngdar_x00e4_nnor"
         elif "Ängsytor trimmas" in resultdict.keys(): resultdict["Ängsytor trimmas"] = "OData__x00c4_ngsytortrimmas"
