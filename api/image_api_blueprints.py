@@ -11,7 +11,6 @@ def post_file():
     """Upload a file and resize it to 300x300 px."""
     filename = request.args.get('filename')
     file = request.files['media']
-    try: img_file = Resize_Image.get(file)
-    except Exception as e:
-        return jsonify(file,e)
+    img_file = Resize_Image.get(file)
+
     return send_file(img_file,download_name=filename,mimetype=file.content_type,as_attachment=True)
