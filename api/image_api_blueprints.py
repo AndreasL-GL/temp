@@ -1,5 +1,5 @@
 
-from flask import Blueprint, render_template, abort, request, send_file
+from flask import Blueprint, request, send_file, jsonify
 from functions.Image_api import Resize_Image
 from functions.authentication import require_api_key
 
@@ -11,5 +11,7 @@ def post_file():
     """Upload a file and resize it to 300x300 px."""
     filename = request.args.get('filename')
     file = request.files['media']
-    img_file = Resize_Image.get(file)
+    try: img_file = Resize_Image.get(file)
+    except Exception as e:
+        return jsonify(file,e)
     return send_file(img_file,download_name=filename,mimetype=file.content_type,as_attachment=True)

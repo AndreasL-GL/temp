@@ -5,3 +5,7 @@ installs.sh
 aws
 terraform/.terraform*
 terraform/terraform.tfstate*
+GLGithub
+GLGithub.pub
+*.sshGLGithub
+*.sshGLGithub.pub
