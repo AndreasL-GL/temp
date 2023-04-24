@@ -18,5 +18,5 @@ def flows_starting_page():
 def get_sharepoint_columns():
     js = request.json
 
-    result = SharepointColumns.get(js)
+    result = SharepointColumns.get_body_from_sharepoint_api(js)
     return result

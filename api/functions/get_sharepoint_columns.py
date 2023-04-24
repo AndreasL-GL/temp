@@ -2,6 +2,7 @@ import pandas as pd
 from flask import jsonify, request
 import json, os
 import Levenshtein
+from config import SharepointConfig
 
 
 class SharepointColumns():
@@ -66,12 +67,26 @@ class SharepointColumns():
 
             result_dict[item1] = most_similar_item
         return result_dict
+    
+    def get_body_from_sharepoint_api(js):
+        resultlist = []
+        for item in js['body']['d']['results']:
+            if item["link"] not in SharepointColumns.remove_columns:
+                resultlist.append({"Moment":item['Title'], "link":item['StaticName']})
+        return resultlist
 
-
+    def get_kontrollmoment(js):
+        js = js["d"]["Choices"]["results"]
+        
+        return js
 
 
 if __name__ == '__main__':
     with open(os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs"),'sharepointlog.json'), encoding="utf-8") as f:
         js = json.load(f)
-        jsons = SharepointColumns.remove_columns(js)
+        #jsons = SharepointColumns.remove_columns(js)
         # print(json.dumps(jsons, indent=3))
+        jsons = SharepointColumns.get_body_from_sharepoint_api(js)
+        print(json.dumps(jsons,indent=3))# json.dumps(jsons['body']['d']['results'][17]['Title'], indent=3))
+        [print(x["link"]) for x in jsons]
+        print(SharepointConfig.remove_list)
