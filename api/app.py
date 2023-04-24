@@ -1,16 +1,20 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, Response,\
-    make_response, json, send_file, jsonify, abort
-from config import Config
+from flask import Flask, render_template, request, jsonify, abort
+import configparser
+import os
+
 from functions.SQL_commands import Sql
 from image_api_blueprints import image_resize
-from flow_tools_blueprints import flow_starting_page, get_sharepoint_columns_
+from flow_tools_blueprints import flow_starting_page, get_sharepoint_columns_, get_kontrollmoment
 
+config = configparser.ConfigParser()
+config.read(os.path.join(os.path.join(os.path.dirname(__file__),'config'),"config.ini"))
 
 app = Flask(__name__)
-app.secret_key = Config.SECRET_KEY
+app.secret_key = config["DEFAULTS"]["SECRET_KEY"]
 app.register_blueprint(image_resize)
 app.register_blueprint(flow_starting_page)
 app.register_blueprint(get_sharepoint_columns_)
+app.register_blueprint(get_kontrollmoment)
 
 @app.route("/", methods=['GET', 'POST'])
 def Home():
@@ -19,13 +23,15 @@ def Home():
 
 @app.route("/help")
 def help():
-    
-    return jsonify(Config.API_KEYS)
+    return jsonify(eval(config["DEFAULTS"]["API_KEYS"]))
 
 @app.before_request
 def limit_remote_addr():
-    if any(Config.ACCEPT_CONNECTIONS_FROM):
-        if any(Config.ACCEPT_CONNECTIONS_FROM) and request.remote_addr not in Config.ACCEPT_CONNECTIONS_FROM:
+    print(config["ACCEPT_CONNECTIONS_FROM"])
+    client_list = [x for x in config["ACCEPT_CONNECTIONS_FROM"]]
+    
+    if any(client_list):
+        if any(client_list) and request.remote_addr not in client_list:
             abort(403)  # Forbidden
         
         

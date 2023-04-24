@@ -2,12 +2,12 @@ import requests
 from PIL import Image,ExifTags
 import io, json
 import os
-URL = "http://localhost/api/"
+URL = "http://localhost:3000/api/"
 API_KEY = "ABCDEFG"
 def test_image_resize():
-    url = URL+f'image_resizer?filename=filnamn.jpg&API_KEY={API_KEY}'
-    files = {'media': open('test.jpg', 'rb')}
-    imm = Image.open("test.jpg")
+    url = URL+f'image_resizer?filename=filnamn.jpg&API_KEY={API_KEY}&height=500&width=500'
+    files = {'media': open(os.path.join(os.path.dirname(__file__),'test.jpg'), 'rb')}
+    imm = Image.open(os.path.join(os.path.dirname(__file__),'test.jpg'))
     im = requests.post(url, files=files)
     try:
         img = Image.open(io.BytesIO(im.content))
@@ -23,5 +23,12 @@ def test_sharepoint():
 
     rs = requests.post(url,json=js)
     print(rs.content)    
+
+def test_sharepointv2():
+    site="GLMalmAB-EgenkontrollerVellingebostder"
+    list_ = 'MKB Egenkontroll Periodiska 2023'
+    rs = requests.get(f'{URL}flows/get_sharepoint_columns_v2?listt={list_}&site={site}&API_KEY='+API_KEY)
+    print(f'{URL}flows/get_sharepoint_columns_v2?list={list_}&site={site}&API_KEY='+API_KEY)
+    print(rs.text)
     
-test_sharepoint()
+test_sharepointv2()

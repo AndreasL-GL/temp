@@ -1,4 +1,4 @@
-import os
+import os, configparser
 class Config():
     SQL_CONNECTION =""
     SECRET_KEY = "SAOMDK#)1ek 0=#"
@@ -14,4 +14,6 @@ class SharepointConfig():
     remove_list=remove_list
 
 if __name__ == '__main__':
-    print(SharepointConfig.remove_list)
+    config = configparser.ConfigParser()
+    config.read(os.path.join(os.path.join(os.path.dirname(__file__),'config'),"config.ini"))
+    print(config["SQL_VARIABLES"]["API_KEYS"])

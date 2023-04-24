@@ -1,4 +1,4 @@
-import sqlite3, sqlalchemy
+import sqlite3
 from flask import jsonify
 
 

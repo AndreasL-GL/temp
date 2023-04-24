@@ -9,3 +9,5 @@ GLGithub
 GLGithub.pub
 *.sshGLGithub
 *.sshGLGithub.pub
+*login.txt
+login.txt
