@@ -1,6 +1,4 @@
 import json, os
-from shareplum import Site
-from shareplum import Office365
 import requests
 
 with open(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),'config'),'sharepoint_egenkontroller_remove_list.txt')) as f:
