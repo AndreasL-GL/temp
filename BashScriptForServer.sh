@@ -5,4 +5,4 @@ cd ~
 sudo rm -r temp
 git clone https://github.com/AndreasL-GL/temp.git
 cd temp
-sudo docker compose up -d --build
+sudo docker compose up --build

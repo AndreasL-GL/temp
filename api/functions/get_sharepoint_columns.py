@@ -72,7 +72,7 @@ class SharepointColumns():
         resultlist = []
         if 'body' in js.keys(): js = js['body']
         for item in js['d']['results']:
-            if item['StaticName'] not in SharepointConfig.remove_list
+            if item['StaticName'] not in SharepointConfig.remove_list:
                 resultlist.append({"Moment":item['Title'], "link":item['StaticName']})
         return resultlist
 
