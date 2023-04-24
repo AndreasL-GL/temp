@@ -17,4 +17,6 @@ def flows_starting_page():
 @require_api_key
 def get_sharepoint_columns():
     js = request.json
-    return SharepointColumns.get(js)
+
+    result = SharepointColumns.get(js)
+    return result

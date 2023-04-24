@@ -39,7 +39,8 @@ class SharepointColumns():
         kontrollpunkter_from_link = [x.split(',')[0] if ',' in x else x for x in kontrollpunkter_from_link]
         resultdict = SharepointColumns.levenshtein_dictionary(kontrollmoment,kontrollpunkter_from_link)
         resultdict = {key: list(body.keys())[kontrollpunkter_from_link.index(value)] for key,value in resultdict.items()}
-        print(resultdict)
+        try: resultdict["Vårsopning"] = "Vårsopning".replace('å','_x00e5_')
+        except Exception as e: print(e)
         return resultdict
     
     def levenshtein_dictionary(list1,list2):
@@ -55,7 +56,6 @@ class SharepointColumns():
                     most_similar_item = item2
 
             result_dict[item1] = most_similar_item
-            if item1=="Vårsopning": result_dict[item1] = "Vårsopning".replace('å','_x00e5_')
         return result_dict
 
 
