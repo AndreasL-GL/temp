@@ -11,6 +11,7 @@ class ImageConfig():
 class SharepointConfig():
     with open(os.path.join(os.path.join(os.path.dirname(__file__),'config'),'sharepoint_egenkontroller_remove_list.txt')) as f:
         remove_list = [x.replace('\n','') for x in f.readlines() if x!='\n']
+    remove_list=remove_list
 
 if __name__ == '__main__':
     print(SharepointConfig.remove_list)
