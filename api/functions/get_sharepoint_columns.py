@@ -40,12 +40,17 @@ class SharepointColumns():
         kontrollpunkter_from_link = [x.split(',')[0] if ',' in x else x for x in kontrollpunkter_from_link]
         resultdict = SharepointColumns.levenshtein_dictionary(kontrollmoment,kontrollpunkter_from_link)
         resultdict = {key: list(body.keys())[kontrollpunkter_from_link.index(value)] for key,value in resultdict.items()}
-        if "Vårsopning" in resultdict.keys(): resultdict["Vårsopning"] = "V_x00e5_rsopning"
-        elif "Rensa öppna rännor" in resultdict.keys(): resultdict["Rensa öppna rännor"] = "Rensa_x00f6_ppnar_x00e4_nnor"
-        elif "Rensa stängda rännor" in resultdict.keys(): resultdict["Rensa stängda rännor"] = "Rensast_x00e4_ngdar_x00e4_nnor"
-        elif "Ängsytor trimmas" in resultdict.keys(): resultdict["Ängsytor trimmas"] = "OData__x00c4_ngsytortrimmas"
         resultdict = [{"Moment":key, "link": value, "boolean":body[value]}  for key,value in resultdict.items()]
-        return resultdict
+        resultlist=[]
+        for item in resultdict:
+            if item["Moment"] == "Vårstädning": item["link"] = "V_x00e5_rsopning"
+            elif item["Moment"] == "Rensa öppna rännor": item["link"] = "Rensa_x00f6_ppnar_x00e4_nnor"
+            elif item["Moment"] == "Rensa stängda rännor": item["link"] = "Rensast_x00e4_ngdar_x00e4_nnor"
+            elif item["Moment"] == "Ängsytor trimmas": item["link"] = "OData__x00c4_ngsytortrimmas"
+            resultlist.append(item)
+            
+            
+        return resultlist
     
     def levenshtein_dictionary(list1,list2):
         result_dict = {}
