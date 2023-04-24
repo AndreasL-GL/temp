@@ -1,6 +1,6 @@
-sudo docker container prune
-sudo docker images prune
-sudo docker network prune
+sudo docker container prune -y
+sudo docker images prune -y
+sudo docker network prune -y
 cd ~
 sudo rm -r temp
 git clone https://github.com/AndreasL-GL/temp.git

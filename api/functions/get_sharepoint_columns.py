@@ -43,7 +43,7 @@ class SharepointColumns():
         resultdict = [{"Moment":key, "link": value, "boolean":body[value]}  for key,value in resultdict.items()]
         resultlist=[]
         for item in resultdict:
-            if item["Moment"] == "Vårstädning": item["link"] = "V_x00e5_rsopning"
+            if item["Moment"] == "Vårsopning": item["link"] = "V_x00e5_rsopning"
             elif item["Moment"] == "Rensa öppna rännor": item["link"] = "Rensa_x00f6_ppnar_x00e4_nnor"
             elif item["Moment"] == "Rensa stängda rännor": item["link"] = "Rensast_x00e4_ngdar_x00e4_nnor"
             elif item["Moment"] == "Ängsytor trimmas": item["link"] = "OData__x00c4_ngsytortrimmas"
