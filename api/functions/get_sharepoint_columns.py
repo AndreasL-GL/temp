@@ -13,7 +13,8 @@ class SharepointColumns():
         return jsonify(body)
     
     def remove_columns(js):
-        body = js['value'][0]
+        if 'value' in js.keys(): body = js['value'][0]
+        else: body = js
         templist = []
         columns_to_remove = ['@odata','Modified', 'Created', 'Author', 'Author#Claims', 'Editor', 'Editor#Claims', \
             'Identifier', 'IsFolder', 'Thumbnail', 'Link', 'Name', 'FilenameWithExtension', 'Path', 'FullPath', \
@@ -39,8 +40,6 @@ class SharepointColumns():
         kontrollpunkter_from_link = [x.split(',')[0] if ',' in x else x for x in kontrollpunkter_from_link]
         resultdict = SharepointColumns.levenshtein_dictionary(kontrollmoment,kontrollpunkter_from_link)
         resultdict = {key: list(body.keys())[kontrollpunkter_from_link.index(value)] for key,value in resultdict.items()}
-        #try: resultdict["Vårsopning"] = "Vårsopning".replace('å','_x00e5_')
-        #except Exception as e: print(e)
         resultdict = [{"Moment":key, "link": value, "boolean":body[value]}  for key,value in resultdict.items()]
         return resultdict
     
