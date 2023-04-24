@@ -18,5 +18,6 @@ def flows_starting_page():
 def get_sharepoint_columns():
     js = request.json
 
-    result = SharepointColumns.get_body_from_sharepoint_api(js)
+    try: result = SharepointColumns.get_body_from_sharepoint_api(js)
+    except Exception as e: result=e
     return result

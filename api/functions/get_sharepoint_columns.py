@@ -70,7 +70,8 @@ class SharepointColumns():
     
     def get_body_from_sharepoint_api(js):
         resultlist = []
-        for item in js['body']['d']['results']:
+        if 'body' in js.keys(): js = js['body']
+        for item in js['d']['results']:
             if item["link"] not in SharepointColumns.remove_columns:
                 resultlist.append({"Moment":item['Title'], "link":item['StaticName']})
         return resultlist
