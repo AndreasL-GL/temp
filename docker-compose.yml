@@ -5,7 +5,7 @@ services:
     build: ./api
     command: gunicorn --bind 0.0.0.0:80 app:app
     volumes: 
-    - ./website:/usr/src/app/
+    - ./api:/usr/src/app/
     ports:
     - 5000:5000
   nginx:
