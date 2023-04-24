@@ -22,7 +22,7 @@ def get_sharepoint_columns():
     result = get_body_from_sharepoint_api(js)
     return result
 
-@get_kontrollmoment.route("/api/flows/get_sharepoint_columns_v2", methods=['GET'])
+@get_kontrollmoment.route("/api/flows/get_sharepoint_columns_v2/", methods=['GET'])
 @require_api_key
 def get_kontrollmoment_():
     list_ = request.args.get("listt")
