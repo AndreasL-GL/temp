@@ -9,6 +9,7 @@ class SharepointColumns():
         print(body, type(body))
         with open('./logs/sharepointlog.json', 'w') as f:
             json.dump(body,f,indent=4)
+        body = SharepointColumns.remove_columns(body)
         return jsonify(body)
     
     def remove_columns(js):
