@@ -55,6 +55,7 @@ class SharepointColumns():
                     most_similar_item = item2
 
             result_dict[item1] = most_similar_item
+            if item1=="Vårsopning": result_dict[item1] = "Vårsopning".replace('å','_x00e5_')
         return result_dict
 
 
