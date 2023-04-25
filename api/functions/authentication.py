@@ -7,7 +7,7 @@ config.read(os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__))
 def require_api_key(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        api_key = request.args.get("API_KEY", "")
+        api_key = request.args.get("API_KEYS")
         if api_key not in eval(config["DEFAULTS"]["API_KEYS"]):
             abort(401, description="Invalid API key")
         return func(*args, **kwargs)

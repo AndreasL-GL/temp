@@ -105,5 +105,4 @@ def get_sharepoint_authorization_header_from_username_password(username,password
 if __name__ == '__main__':
     with open(os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)),'api'),'functions'),'Sharepoint'),'login.txt')) as f:
         p = eval(f.read())
-        print(p["user"],p["pass"])
     print(get_sharepoint_authorization_header_from_username_password(p["user"],p["pass"]))
