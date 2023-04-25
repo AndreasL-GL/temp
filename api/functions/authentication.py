@@ -8,7 +8,7 @@ def require_api_key(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
         api_key = request.args.get("API_KEYS")
-        if api_key not in eval(config["DEFAULTS"]["API_KEYS"]):
+        if api_key not in ["ABCDEFG","1","asda"]:
             abort(401, description="Invalid API key")
         return func(*args, **kwargs)
     return decorated_function
