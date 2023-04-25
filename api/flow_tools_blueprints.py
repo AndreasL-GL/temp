@@ -25,7 +25,7 @@ def get_sharepoint_columns():
 @get_kontrollmoment.route("/api/flows/get_sharepoint_columns_v2/", methods=['GET'])
 @require_api_key
 def get_kontrollmoment_():
-    list_ = request.args.get("listt")
+    list_ = request.args.get("list")
     site = request.args.get("site")
     
     result = get_fields(site,list_)

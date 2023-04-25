@@ -1,5 +1,8 @@
 import json, os
 import requests
+import configparser
+config = configparser.ConfigParser()
+config.read(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),'config'),"config.ini"))
 
 with open(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),'config'),'sharepoint_egenkontroller_remove_list.txt')) as f:
     sharepoint_columns_remove_list = [x.replace('\n','') for x in f.readlines() if x != '\n']
@@ -12,13 +15,14 @@ def get_body_from_sharepoint_api(js):
         if item['StaticName'] not in sharepoint_columns_remove_list:
             resultlist.append({"Moment":item['Title'], "link":item['StaticName']})
     return resultlist
-def get_sharepoint_access_headers():
-    client_id = "50d23ac1-8de9-4941-9399-004472826045"
-    client_secret = "1Zo5LkdK4ZZfzuIXKO2o2FslnZBC5keyqqpEqW1YWEs="
-    tenant_id = "a096cfba-db7b-4c9c-9506-d8e91da824ee"
-    tenant = "greenlandscapingmalmo"
+
+def get_sharepoint_access_headers_through_client_id():
+    client_id = config["SHAREPOINT"]["client_id"].strip()
+    client_secret = config["SHAREPOINT"]["client_secret"].strip()
+    tenant_id = config["SHAREPOINT"]["tenant_id"].strip()
+    tenant = config["SHAREPOINT"]["tenant"]
     client_id = client_id + '@'+tenant_id
-    site = "GLMalmAB-EgenkontrollerVellingebostder"
+    
     data = {
     'grant_type':'client_credentials',
     'resource': "00000003-0000-0ff1-ce00-000000000000/" + tenant + ".sharepoint.com@" + tenant_id, 
@@ -39,8 +43,9 @@ def get_sharepoint_access_headers():
     'Content-Type': 'application/json;odata=verbose'
 }
     return headers
+
 def get_fields(site, list_):
-    headers=get_sharepoint_access_headers()
+    headers=get_sharepoint_access_headers_through_client_id()
     tenant = "greenlandscapingmalmo"
     #site = "GLMalmAB-EgenkontrollerVellingebostder"
     url = f"https://{tenant}.sharepoint.com/sites/{site}/_api/web/lists/getbytitle('{list_}')/fields"
@@ -49,3 +54,8 @@ def get_fields(site, list_):
     js= json.loads(l.text)
     js = get_body_from_sharepoint_api(js)
     return js
+
+if __name__ == '__main__':
+    site = "GLMalmAB-EgenkontrollerVellingebostder"
+    list_ = "MKB Egenkontroll Oxie Periodiska 2023"
+    print(get_fields(site,list_))
