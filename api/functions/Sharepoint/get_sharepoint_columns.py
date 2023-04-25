@@ -48,6 +48,7 @@ def get_fields(site, list_):
     headers=get_sharepoint_access_headers_through_client_id()
     tenant = "greenlandscapingmalmo"
     #site = "GLMalmAB-EgenkontrollerVellingebostder"
+    site = site.split('sites/')[1]
     url = f"https://{tenant}.sharepoint.com/sites/{site}/_api/web/lists/getbytitle('{list_}')/fields"
     print(url)
     l = requests.get(url, headers=headers)
