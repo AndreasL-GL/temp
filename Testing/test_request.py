@@ -2,7 +2,7 @@ import requests
 from PIL import Image,ExifTags
 import io, json
 import os
-URL = "http://51.124.105.224/api/"
+URL = "http://localhost:3000/api/" #51.124.105.224
 API_KEY = "ABCDEFG"
 def test_image_resize():
     url = URL+f'image_resizer?filename=filnamn.jpg&API_KEY={API_KEY}&height=500&width=500'
@@ -31,5 +31,11 @@ def test_sharepointv2():
     rs = requests.get(f'{URL}flows/get_sharepoint_columns_v2?list=MKB Egenkontroll Periodiska 2023&site=GLMalmAB-EgenkontrollerVellingebostder&API_KEY='+API_KEY)
     print(f'{URL}flows/get_sharepoint_columns_v2?list={list_}&site={site}&API_KEY=ABCDEFG')
     print(rs.text)
-    
-test_sharepointv2()
+
+def test_excel_functions():
+    url = URL+f'excel_dagbok?application=Dagbok&filename="abcdefg.xlsx"'
+    files = {'media': open(os.path.join(os.path.dirname(__file__),'Dagbok (2).xlsx'), 'rb')}
+    im = requests.post(url, files=files)
+    with open(os.path.join(os.path.dirname(__file__),'horse.xlsx'), 'wb') as f:
+        f.write(im.content)
+test_excel_functions()

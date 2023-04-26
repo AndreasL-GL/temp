@@ -13,4 +13,4 @@ def post_file():
     file = request.files['media']
     img_file = resize_and_autoorient(file)
 
-    return send_file(img_file,download_name=filename,mimetype=file.content_type,as_attachment=True)
+    return send_file(img_file,download_name=filename,as_attachment=True)
