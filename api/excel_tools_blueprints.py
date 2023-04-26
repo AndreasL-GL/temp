@@ -1,14 +1,18 @@
 from flask import Blueprint, render_template, request, send_file
 from functions.authentication import require_api_key
 from functions.Excel.Get_Excel_data_to_json import  convert_file_to_workbook
-import os
+import os,io,base64
 excel_dagbok = Blueprint('excel_dagbok_trädexperterna', __name__)
 
 @excel_dagbok.route("/api/excel_dagbok", methods=["POST"])
 @require_api_key
 def get_excel_file():
-    file=request.files['file']
-    file.save('./uploads/'+file.filename)
+    file=request.files['document']
+    bytefile=io.BytesIO()
+    file.save(bytefile)
+    #excel_file=convert_file_to_workbook(file)
+    file_content_base64 = base64.b64encode(file).decode('utf-8')
+    return send_file(file_content_base64,download_name='abcd.xlsx',as_attachment=True)
     return "File Uploaded successfully!"
 
 def post_excel_file():
