@@ -1,11 +1,12 @@
+import io, os
 
-def repair_excel_file(filename):
+def repair_excel_file(file):
     import  jpype     
     import  asposecells     
     jpype.startJVM() 
-    from asposecells.api import Workbook
+    from asposecells.api import Workbook, Cells
     
-    workbook = Workbook("newfile.xlsx")
-    workbook.Save("newfile.xlsx")
+    workbook = Workbook(file)
+    workbook.save(file)
     jpype.shutdownJVM()
-repair_excel_file('a')
+    return file

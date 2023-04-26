@@ -2,7 +2,7 @@ import requests
 from PIL import Image,ExifTags
 import io, json
 import os
-URL = "http://localhost:3000/api/" #51.124.105.224
+URL = "http://localhost/api/" #51.124.105.224
 API_KEY = "ABCDEFG"
 def test_image_resize():
     url = URL+f'image_resizer?filename=filnamn.jpg&API_KEY={API_KEY}&height=500&width=500'

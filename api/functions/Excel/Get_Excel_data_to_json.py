@@ -7,6 +7,7 @@ import datetime
 from functions.Excel.date_functions import get_first_and_last_week_of_month,get_first_day_of_first_week, get_month_from_year_week, get_week_numbers
 from functions.Excel.date_functions import get_month_from_week, get_month_name_from_number
 import io
+from functions.Excel.repair_excel_file import repair_excel_file
 
 def get_dictionary_from_dagbok_sheet(sheet):
     "Creates a dictionary from a dagbook excel sheet"
@@ -91,9 +92,7 @@ def convert_file_to_workbook(bytefile):
     except Exception as e:
         return jsonify(e)
     file_data = io.BytesIO()
-
     wb.save(file_data)
-
     file_data.seek(0)
     return file_data
     
@@ -109,7 +108,6 @@ def call_functions(wb):
     
 def enter_items_into_sheet(wb, items): #Erik Rask Alstor ; Putters Alstor ; Kungsbacka skog
     """Manually enters all cells into a sheet."""
-    
     sheet = wb.active
     # Deklarera variabler
     year = items['info']["År"]
