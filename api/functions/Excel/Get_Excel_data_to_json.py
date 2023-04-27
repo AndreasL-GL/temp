@@ -16,6 +16,7 @@ else:
     import io
     from functions.Excel.repair_excel_file import repair_excel_file
     from functions.Excel.get_excel_file import download_excel_file
+from werkzeug.datastructures import FileStorage
 
 def get_dictionary_from_dagbok_sheet(sheet):
     "Creates a dictionary from a dagbook excel sheet"
@@ -97,7 +98,12 @@ def get_dictionary_from_dagbok_sheet(sheet):
 
 def convert_file_to_workbook(bytefile):
     print("------------------------",type(bytefile),'---------------------------------')
-    wb = openpyxl.load_workbook(bytefile)
+    if not isinstance(bytefile, FileStorage):
+        wb = openpyxl.load_workbook(bytefile)
+    else:
+        wb = openpyxl.load_workbook(io.BytesIO(bytefile.read()))
+
+    
     
     wb,filename = call_functions(wb)
     file_data = io.BytesIO()
