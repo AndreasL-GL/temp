@@ -60,10 +60,7 @@ def get_dictionary_from_dagbok_sheet(sheet):
         arbetspost2_1,arbetspost3_1,arbetspost4_1,resa_from_1,resa_till_1,km_1,restid_1
         in zip(fastighet,dag,trees, name,start_kl,slut_kl,rast_tim,veckodag, arbetspost1,arbetspost2,arbetspost3,
             arbetspost4, resa_from, resa_till, km, restid)]
-    poster = ['SOS ledare','Lastbil','Avant med förare','Skotning','Skotare','Mark Arb', 'Platschef', 'Träd- besiktning','Trädbesiktare',\
-        'Byggmöten','Arborist']
-    poster_i_js=[sheet['I19'].value,sheet['J19'].value,sheet['K19'].value,sheet['L19'].value]
-    other = sum([sum([js[i][x] for x in poster_i_js if x not in poster]) for i in range(len(js))])
+    
     js2 = []
     i=1
     for item in js:
@@ -78,7 +75,10 @@ def get_dictionary_from_dagbok_sheet(sheet):
         else: item["Datum"] = date.fromisocalendar(2023, sheet['J3'].value, i).strftime("%Y-%m-%d")
         i+=1
         js2.append(item)
-
+    poster = ['SOS ledare','Lastbil','Avant med förare','Skotning','Skotare','Mark Arb', 'Platschef', 'Träd- besiktning','Trädbesiktare',\
+        'Byggmöten','Arborist']
+    poster_i_js=[sheet['I19'].value,sheet['J19'].value,sheet['K19'].value,sheet['L19'].value]
+    other = sum([sum([js2[i][x] for x in poster_i_js if x not in poster]) for i in range(len(js2))])
         
 
 
