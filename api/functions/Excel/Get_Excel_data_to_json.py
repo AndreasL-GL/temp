@@ -60,6 +60,10 @@ def get_dictionary_from_dagbok_sheet(sheet):
         arbetspost2_1,arbetspost3_1,arbetspost4_1,resa_from_1,resa_till_1,km_1,restid_1
         in zip(fastighet,dag,trees, name,start_kl,slut_kl,rast_tim,veckodag, arbetspost1,arbetspost2,arbetspost3,
             arbetspost4, resa_from, resa_till, km, restid)]
+    poster = ['SOS ledare','Lastbil','Avant med förare','Skotning','Skotare','Mark Arb', 'Platschef', 'Träd- besiktning','Trädbesiktare',\
+        'Byggmöten','Arborist']
+    poster_i_js=[sheet['I19'].value,sheet['J19'].value,sheet['K19'].value,sheet['L19'].value]
+    other = sum([js[x] for x in poster_i_js if x not in poster])
     js2 = []
     i=1
     for item in js:
@@ -86,7 +90,8 @@ def get_dictionary_from_dagbok_sheet(sheet):
                 "Vecka":sheet['J3'].value,
                 "Lag nr":sheet['L2'].value,
                 "Dag":sheet['L3'].value,
-                "Dagboksnamn":sheet['D1'].value
+                "Dagboksnamn":sheet['D1'].value,
+                "Övrig arbetstid":other
             },
             "poster":js2
         }
@@ -131,7 +136,7 @@ def call_functions(wb):
     return wb,filename
     
     
-def enter_items_into_sheet(wb, items): #Erik Rask Alstor ; Putters Alstor ; Kungsbacka skog
+def enter_items_into_sheet(wb, items): 
     """Manually enters all cells into a sheet."""
     sheet = wb.active
     # Deklarera variabler
@@ -378,6 +383,12 @@ def enter_items_into_sheet(wb, items): #Erik Rask Alstor ; Putters Alstor ; Kung
     if 'SOS ledare' in items['poster'][0].keys():
         if sheet["E125"].value: sheet["E125"] = sheet["E125"].value + sum([float(item["SOS ledare"]) for item in items['poster']])
         else: sheet["E125"] = sum([float(item["SOS ledare"]) for item in items['poster']])
+    
+    if items['info']['Övrig arbetstid']:
+        if sheet["AA129"].value: sheet["AA129"] = sheet["AA129"].value + items['info']['Övrig arbetstid']
+        else: sheet["AA129"] = items['info']['Övrig arbetstid']
+    
+    
     wb.save(os.path.join(os.path.dirname(__file__),"newfile.xlsx"))
     return wb
     
