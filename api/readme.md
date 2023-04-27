@@ -12,7 +12,7 @@ All simple functions are located in the folder functions. See readme-functions.m
 
 #### How do I add a route?
 To add a route blueprint, simply copy the structure showed in the blueprints, or use this example:
-``
+´´
 from flask import Blueprint, render_template
 
 route_blueprint = Blueprint('myroute', __name__)
@@ -20,12 +20,12 @@ route_blueprint = Blueprint('myroute', __name__)
 @require_api_key # Optional
 def myroute():
     return render_template("myroute.html")
-``
+´´
 Remember to add this to the file "app.py"
-``
+´´
 from YOUR_FILE import route_blueprint
 app.register_blueprint(route_blueprint)
-``
+´´
 
 #### How do I add a function?
 Functions are usually just called inside the route function.
@@ -33,4 +33,4 @@ So like standard python code, import the function in the blueprint file and run 
 All functions are stored inside root/functions for simplicity.
 
 #### Configurations and Environment variables
-To not make it too complicated and hard to navigate, all configuration variables are set in the config.py file.
+To not make it too complicated and hard to navigate, all configuration and environment variables are set in the config.ini file inside the config folder.
