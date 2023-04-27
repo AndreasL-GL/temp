@@ -9,11 +9,13 @@ if __name__ == '__main__':
     from date_functions import get_month_from_week, get_month_name_from_number
     import io
     from repair_excel_file import repair_excel_file
+    from get_excel_file import download_excel_file
 else:
     from functions.Excel.date_functions import get_first_and_last_week_of_month,get_first_day_of_first_week, get_month_from_year_week, get_week_numbers
     from functions.Excel.date_functions import get_month_from_week, get_month_name_from_number
     import io
     from functions.Excel.repair_excel_file import repair_excel_file
+    from functions.Excel.get_excel_file import download_excel_file
 
 def get_dictionary_from_dagbok_sheet(sheet):
     "Creates a dictionary from a dagbook excel sheet"
@@ -104,10 +106,11 @@ def convert_file_to_workbook(bytefile):
     
 def collect_workbook(items,filename):
     filename = items["info"]["Månad"] + " - Sammanställning - Trädexperterna"+".xlsx"
-    if not os.path.exists(os.path.join(os.path.dirname(__file__),filename)):
+    l = download_excel_file("TrdexperternaApplikationer")
+    if "finns inte" not in str(l.content):
+        wb = openpyxl.load_workbook(l)
+    else: 
         wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'template.xlsx'))
-        # This is where I get the file from the sharepoint site.
-    else: wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),filename))
     return wb, filename
 
 def call_functions(wb):
