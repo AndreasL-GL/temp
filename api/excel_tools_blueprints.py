@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, send_file,jsonify
+from flask import Blueprint, render_template, request, send_file,jsonify, abort
 from functions.authentication import require_api_key
 from functions.Excel.Get_Excel_data_to_json import  convert_file_to_workbook
 import os,io,base64
@@ -8,7 +8,8 @@ excel_dagbok = Blueprint('excel_dagbok_trädexperterna', __name__)
 @require_api_key
 
 def get_excel_file():
-    file_content = request.json.get('contentBytes')
+    file_content = request.get_json().keys()
+    abort(401, description=file_content)
     #file_content=base64.b64decode(file_content)
     #file_content=io.BytesIO(file_content)
     excel_file,filename=convert_file_to_workbook(file_content)
