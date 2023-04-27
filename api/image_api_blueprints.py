@@ -13,7 +13,7 @@ def post_file():
     width = request.json.get('width')
     height = request.json.get('height')
     file_content=base64.b64decode(file_content)
-    img_file=resize_and_autoorient(file_content)
+    img_file=resize_and_autoorient(file_content, height,width)
     file_content=base64.b64enchode(img_file.read()).decode('utf-8')
     return jsonify({"content":file_content})
     
