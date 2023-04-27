@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, jsonify, abort
 import configparser
 import os
-import functions.Excel.date_functions
 
 from functions.SQL_commands import Sql
 from image_api_blueprints import image_resize
