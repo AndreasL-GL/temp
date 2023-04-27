@@ -43,7 +43,7 @@ def autoorient(image):
 def resize_and_autoorient(file, height,width):
     """Accepts a file bytes object and returns a file bytes object
     Resizes an image based on specifications in the config."""
-    f = Image.open(fil, format="JPEG")
+    f = Image.open(file, format="JPEG")
     f = autoorient(f)
     f=f.resize((int(height),int(width)))
     # Create a bytes object to send in response
