@@ -62,7 +62,7 @@ def get_month_name_from_number(month):
 
 def get_month_from_week(year, week_number):
     # Create a datetime object for the given year and week number
-    dt = datetime.strptime(f'{year}-W{week_number}-1', '%Y-W%W-%w')
+    dt = datetime.datetime.strptime(f'{year}-W{week_number}-1', '%Y-W%W-%w')
 
     # Get the month in the ISO format
     month = dt.strftime('%Y-%m')

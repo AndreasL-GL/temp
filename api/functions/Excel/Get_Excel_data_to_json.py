@@ -4,10 +4,16 @@ import json, os
 from datetime import date
 from flask import jsonify
 import datetime
-from functions.Excel.date_functions import get_first_and_last_week_of_month,get_first_day_of_first_week, get_month_from_year_week, get_week_numbers
-from functions.Excel.date_functions import get_month_from_week, get_month_name_from_number
-import io
-from functions.Excel.repair_excel_file import repair_excel_file
+if __name__ == '__main__':
+    from date_functions import get_first_and_last_week_of_month,get_first_day_of_first_week, get_month_from_year_week, get_week_numbers
+    from date_functions import get_month_from_week, get_month_name_from_number
+    import io
+    from repair_excel_file import repair_excel_file
+else:
+    from functions.Excel.date_functions import get_first_and_last_week_of_month,get_first_day_of_first_week, get_month_from_year_week, get_week_numbers
+    from functions.Excel.date_functions import get_month_from_week, get_month_name_from_number
+    import io
+    from functions.Excel.repair_excel_file import repair_excel_file
 
 def get_dictionary_from_dagbok_sheet(sheet):
     "Creates a dictionary from a dagbook excel sheet"
@@ -82,28 +88,34 @@ def get_dictionary_from_dagbok_sheet(sheet):
             "poster":js2
         }
     results["info"]["Sammanställning"]=sum([float(item[sheet['I19'].value]) + float(item[sheet['J19'].value]) + float(item[sheet['K19'].value]) + float(item[sheet['L19'].value]) for item in results['poster']])
+    results["info"]["Månad"] = get_month_from_week(results["info"]["År"], results["info"]["Vecka"])
     return results
 
 
 
 def convert_file_to_workbook(bytefile):
     wb = openpyxl.load_workbook(bytefile)
-    try: wb = call_functions(wb)
-    except Exception as e:
-        return jsonify(e)
+    wb,filename = call_functions(wb)
     file_data = io.BytesIO()
     wb.save(file_data)
     file_data.seek(0)
-    return file_data
+    return file_data,filename
     
     
-    
+def collect_workbook(items,filename):
+    filename = items["info"]["Månad"] + " - Sammanställning - Trädexperterna"+".xlsx"
+    if not os.path.exists(os.path.join(os.path.dirname(__file__),filename)):
+        wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'template.xlsx'))
+        # This is where I get the file from the sharepoint site.
+    else: wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),filename))
+    return wb, filename
+
 def call_functions(wb):
     sheet = wb.active
     items = get_dictionary_from_dagbok_sheet(sheet)
-    wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'template.xlsx'))
+    wb,filename = collect_workbook(items,'template.xlsx')
     wb = enter_items_into_sheet(wb,items)
-    return wb
+    return wb,filename
     
     
 def enter_items_into_sheet(wb, items): #Erik Rask Alstor ; Putters Alstor ; Kungsbacka skog
@@ -380,4 +392,6 @@ def get_date_range(start_date,end_date):
         all_dates.append(start_date)  # add current date to the list
         start_date += delta
     return all_dates
-
+if __name__ == '__main__':
+    wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Felix.xlsx'))
+    call_functions(wb)
