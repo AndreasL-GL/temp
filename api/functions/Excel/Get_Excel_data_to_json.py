@@ -101,7 +101,8 @@ def convert_file_to_workbook(bytefile):
     if not isinstance(bytefile, FileStorage):
         wb = openpyxl.load_workbook(bytefile)
     else:
-        wb = openpyxl.load_workbook(io.BytesIO(bytefile.read()))
+        bytefile.save(os.path.join(os.path.dirname(__file__),'tempfile.xlsx'))
+        wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'tempfile.xlsx'))
 
     
     
