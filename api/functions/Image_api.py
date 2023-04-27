@@ -40,16 +40,12 @@ def autoorient(image):
 
     return image
 
-def resize_and_autoorient(file):
+def resize_and_autoorient(file, height,width):
     """Accepts a file bytes object and returns a file bytes object
     Resizes an image based on specifications in the config."""
     f = Image.open(file)
     f = autoorient(f)
-    height, width = request.args.get("height"),request.args.get("width")
-    if not height or not width:
-        f = f.resize(eval(config["IMAGE_API"]["IMAGE_SIZE_AFTER_RESIZE"]))
-    else:
-        f=f.resize((int(height),int(width)))
+    f=f.resize((int(height),int(width)))
     # Create a bytes object to send in response
     img_file = io.BytesIO()
     f.save(img_file, format='JPEG')
