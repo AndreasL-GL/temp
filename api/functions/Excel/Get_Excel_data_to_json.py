@@ -315,7 +315,7 @@ def enter_items_into_sheet(wb, items):
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
-                    for index, besiktartimmar in zip(cell_index,[x['Platschef'] if 'Platschef' in x.keys() else 0 for x in items['poster']]):
+                    for index, besiktartimmar in zip(cell_index,[x['Platschef'] for x in items['poster']]):
                         sheet[index] = besiktartimmar
 
                     break
@@ -341,7 +341,7 @@ def enter_items_into_sheet(wb, items):
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
-                    for index, besiktartimmar in zip(cell_index,[x['Platschef'] for x in items['poster']]):
+                    for index, besiktartimmar in zip(cell_index,[x['Mark Arb'] for x in items['poster']]):
                         sheet[index] = besiktartimmar
 
                     break
