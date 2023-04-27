@@ -96,7 +96,9 @@ def get_dictionary_from_dagbok_sheet(sheet):
 
 
 def convert_file_to_workbook(bytefile):
+    print("------------------------",type(bytefile),'---------------------------------')
     wb = openpyxl.load_workbook(bytefile)
+    
     wb,filename = call_functions(wb)
     file_data = io.BytesIO()
     wb.save(file_data)
