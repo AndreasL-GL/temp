@@ -9,7 +9,7 @@ excel_dagbok = Blueprint('excel_dagbok_trädexperterna', __name__)
 def get_excel_file():
     file = request.files['document']
     excel_file,filename=convert_file_to_workbook(file)
-    file_content_base64 = base64.b64encode(file.read()).decode('utf-8')
+    file_content_base64 = base64.b64encode(excel_file.read()).decode('utf-8')
     return jsonify({"content":file_content_base64,"filename":filename})
 
 def post_excel_file():
