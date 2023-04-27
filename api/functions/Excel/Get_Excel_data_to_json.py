@@ -63,7 +63,7 @@ def get_dictionary_from_dagbok_sheet(sheet):
     poster = ['SOS ledare','Lastbil','Avant med förare','Skotning','Skotare','Mark Arb', 'Platschef', 'Träd- besiktning','Trädbesiktare',\
         'Byggmöten','Arborist']
     poster_i_js=[sheet['I19'].value,sheet['J19'].value,sheet['K19'].value,sheet['L19'].value]
-    other = sum([js[x] for x in poster_i_js if x not in poster])
+    other = sum([sum([js[i][x] for x in poster_i_js if x not in poster]) for i in range(len(js))])
     js2 = []
     i=1
     for item in js:
