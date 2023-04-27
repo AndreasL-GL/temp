@@ -108,10 +108,8 @@ def collect_workbook(items,filename):
     filename = items["info"]["Månad"] + " - Sammanställning - Trädexperterna"+".xlsx"
     l = download_excel_file("TrdexperternaApplikationer")
     if "finns inte" not in str(l.content):
-        file_data = io.BytesIO()
-        with open(file_data, 'wb') as f: f.write(l.content)
-        file_data.seek(0)
-        wb = openpyxl.load_workbook(file_data.getvalue())
+        file_data = io.BytesIO(l.content)
+        wb = openpyxl.load_workbook(file_data)
     else: 
         wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'template.xlsx'))
     return wb, filename
