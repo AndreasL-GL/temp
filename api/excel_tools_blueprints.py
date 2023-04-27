@@ -9,7 +9,7 @@ excel_dagbok = Blueprint('excel_dagbok_trädexperterna', __name__)
 def get_excel_file(): #WORKING
     file_content = request.json.get('content')
     file_content=base64.b64decode(file_content)
-    file_content=io.BytesIO(file_content)
+    file_content=io.BytesIO(file_content).getvalue()
     mimetype, encoding = mimetypes.guess_type(file_content)
 
 # Print the MIME type
