@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, send_file,jsonify, abort
 from functions.authentication import require_api_key
 from functions.Excel.Get_Excel_data_to_json import  convert_file_to_workbook
-import os,io,base64, zipfile
+import os,io,base64
 excel_dagbok = Blueprint('excel_dagbok_trädexperterna', __name__)
 
 @excel_dagbok.route("/api/excel_dagbok", methods=["POST"])

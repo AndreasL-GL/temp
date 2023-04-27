@@ -1,20 +1,16 @@
-from __future__ import unicode_literals
 import openpyxl
-import json, os
+import os
 from datetime import date
-from flask import jsonify
 import datetime
 if __name__ == '__main__':
-    from date_functions import get_first_and_last_week_of_month,get_first_day_of_first_week, get_month_from_year_week, get_week_numbers
+    from date_functions import get_first_and_last_week_of_month, get_month_from_year_week, get_week_numbers
     from date_functions import get_month_from_week, get_month_name_from_number
     import io
-    from repair_excel_file import repair_excel_file
     from get_excel_file import download_excel_file
 else:
-    from functions.Excel.date_functions import get_first_and_last_week_of_month,get_first_day_of_first_week, get_month_from_year_week, get_week_numbers
+    from functions.Excel.date_functions import get_first_and_last_week_of_month, get_month_from_year_week, get_week_numbers
     from functions.Excel.date_functions import get_month_from_week, get_month_name_from_number
     import io
-    from functions.Excel.repair_excel_file import repair_excel_file
     from functions.Excel.get_excel_file import download_excel_file
 from werkzeug.datastructures import FileStorage
 
@@ -51,6 +47,7 @@ def get_dictionary_from_dagbok_sheet(sheet):
             sheet['J19'].value:arbetspost2_1,
             sheet['K19'].value:arbetspost3_1,
             sheet['L19'].value:arbetspost4_1,
+            "Övrigt":0,
             "Resa från":resa_from_1,
             "Resa till":resa_till_1,
             "km":km_1,
@@ -63,13 +60,35 @@ def get_dictionary_from_dagbok_sheet(sheet):
     
     js2 = []
     i=1
+    poster = ['SOS ledare','Lastbil','Avant med förare','Skotning','Skotare','Mark Arb', 'Platschef', 'Träd- besiktning','Trädbesiktare',\
+        'Byggmöten','Arborist']
     for item in js:
+        all_values_empty = not item[sheet['I19'].value] \
+        and not item[sheet['J19'].value] \
+        and not item[sheet['K19'].value] \
+        and not item[sheet['L19'].value]
+
         if not item[sheet['I19'].value]: item[sheet['I19'].value] = 0
         if not item[sheet['J19'].value]: item[sheet['J19'].value] = 0
         if not item[sheet['K19'].value]: item[sheet['K19'].value] = 0
         if not item[sheet['L19'].value]: item[sheet['L19'].value] = 0
+        if item[sheet['I19'].value] and item[sheet['I19'].value] not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['I19'].value]
+        if item[sheet['J19'].value] and item[sheet['J19'].value] not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['J19'].value]
+        if item[sheet['K19'].value] and item[sheet['K19'].value] not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['K19'].value]
+        if item[sheet['L19'].value] and item[sheet['L19'].value] not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['L19'].value]
         if "time" in str(type(item["Start Kl"]).__repr__): item[sheet['F19'].value] = item[sheet['F19'].value].strftime("%H:%M")
         if "time" in str(type(item["Slut Kl"]).__repr__): item[sheet['G19'].value] = item[sheet['G19'].value].strftime("%H:%M")
+        # Om alla värdena är tomma och det ändå står tid skrivet, så sätts variabeln Oberäknad tid till
+        # decimalvärdet för tidsskillnaden, dvs. 16:30 - 08:00 = 8.5
+        # Med en timma rast: 8.5 - 1 = 7.5
+        if "time" in str(type(item["Slut Kl"]).__repr__) and "time" in str(type(item["Start Kl"]).__repr__) and all_values_empty:
+            hours = int(item[sheet['F19'].value].split(':')[0])-int(item[sheet['G19'].value].split(':')[0])
+            minutes = int(item[sheet['F19'].value].split(':')[1])-int(item[sheet['G19'].value].split(':')[1])
+            minutes = minutes/60
+            if item["Rast"]: rast = float(item["Rast"])
+            else: rast = 0
+            item["Oberäknad tid"] = hours+minutes + rast
+            
         if sheet["J2"].value:
             item["Datum"] = date.fromisocalendar(sheet['J2'].value, sheet['J3'].value, i).strftime("%Y-%m-%d")
         else: item["Datum"] = date.fromisocalendar(2023, sheet['J3'].value, i).strftime("%Y-%m-%d")
@@ -109,8 +128,6 @@ def convert_file_to_workbook(bytefile):
         bytefile.save(os.path.join(os.path.dirname(__file__),'tempfile.xlsx'))
         wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'tempfile.xlsx'))
 
-    
-    
     wb,filename = call_functions(wb)
     file_data = io.BytesIO()
     wb.save(file_data)
@@ -118,20 +135,20 @@ def convert_file_to_workbook(bytefile):
     return file_data,filename
     
     
-def collect_workbook(items,filename):
+def collect_workbook(items):
     filename = items["info"]["Månad"] + " - Sammanställning - Trädexperterna"+".xlsx"
     l = download_excel_file("TrdexperternaApplikationer")
-    if "finns inte" not in str(l.content):
+    if "finns inte" not in str(l.content) or "not in" not in str(l.content):
         file_data = io.BytesIO(l.content)
         wb = openpyxl.load_workbook(file_data)
     else: 
-        wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'template.xlsx'))
+        wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'template2.xlsx'))
     return wb, filename
 
 def call_functions(wb):
     sheet = wb.active
     items = get_dictionary_from_dagbok_sheet(sheet)
-    wb,filename = collect_workbook(items,'template.xlsx')
+    wb,filename = collect_workbook(items)
     wb = enter_items_into_sheet(wb,items)
     return wb,filename
     
@@ -184,16 +201,16 @@ def enter_items_into_sheet(wb, items):
         # SET RESTID
     if 'Platschef' in items['poster'][0].keys() or 'Trädbesiktare' in items['poster'][0].keys() or 'Träd- besiktning' in items['poster'][0].keys():
         if any([x['Restid'] for x in items['poster'] if x]):
-            if sheet["AA118"].value:
-                sheet["AA118"] += sum([x["Restid"] for x in items['poster'] if x['Restid']])
+            if sheet["AA142"].value:
+                sheet["AA142"] += sum([x["Restid"] for x in items['poster'] if x['Restid']])
             else:
-                sheet["AA118"] =  sum([x["Restid"] for x in items['poster'] if x['Restid']])
+                sheet["AA142"] =  sum([x["Restid"] for x in items['poster'] if x['Restid']])
     else:
         if any([x['Restid'] for x in items['poster'] if x['Restid']]):
-            if sheet["AA124"].value:
-                sheet["AA124"] += sum([x["Restid"] for x in items['poster'] if x['Restid']])
+            if sheet["AA148"].value:
+                sheet["AA148"] += sum([x["Restid"] for x in items['poster'] if x['Restid']])
             else:
-                sheet["AA124"]  = sum([x["Restid"] for x in items['poster'] if x['Restid']])
+                sheet["AA148"]  = sum([x["Restid"] for x in items['poster'] if x['Restid']])
         
         
     # SET ARBORIST TIMES AND KM
@@ -400,15 +417,47 @@ def enter_items_into_sheet(wb, items):
                     for index, besiktartimmar in zip(cell_index,[x['Lastbil'] for x in items['poster']]):
                         sheet[index] = besiktartimmar
                     break
-    
+    if 'SOS-Ledare' in items['poster'][0].keys():
+        if any([x['SOS-Ledare'] for x in items['poster'] if x!='0']):
+
+            for cell in excel_range_to_list("A113:A119"):
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
+                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                    index_number = cell[1:]
+
+                    cell_index = [item['column_index'] + index_number for item in items['poster']]
+                    for index, besiktartimmar in zip(cell_index,[x['SOS-ledare'] for x in items['poster']]):
+                        sheet[index] = besiktartimmar
+                    break
                 
-    if 'SOS ledare' in items['poster'][0].keys():
-        if sheet["E125"].value: sheet["E125"] = sheet["E125"].value + sum([float(item["SOS ledare"]) for item in items['poster']])
-        else: sheet["E125"] = sum([float(item["SOS ledare"]) for item in items['poster']])
+    if 'Övrigt' in items['poster'][0].keys():
+        if any([x['Övrigt'] for x in items['poster'] if x!='0']):
+
+            for cell in excel_range_to_list("A121:A130"):
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
+                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                    index_number = cell[1:]
+
+                    cell_index = [item['column_index'] + index_number for item in items['poster']]
+                    for index, besiktartimmar in zip(cell_index,[x['Övrigt'] for x in items['poster']]):
+                        sheet[index] = besiktartimmar
+                    break
+    if 'Oberäknad tid' in items['poster'][0].keys():
+        if any([x['Oberäknad tid'] for x in items['poster'] if x!='0']):
+
+            for cell in excel_range_to_list("A132:A137"):
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
+                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                    index_number = cell[1:]
+
+                    cell_index = [item['column_index'] + index_number for item in items['poster']]
+                    for index, besiktartimmar in zip(cell_index,[x['Oberäknad tid'] for x in items['poster']]):
+                        sheet[index] = besiktartimmar
+                    break
     
     if items['info']['Övrig arbetstid']:
-        if sheet["AA129"].value: sheet["AA129"] = sheet["AA129"].value + items['info']['Övrig arbetstid']
-        else: sheet["AA129"] = items['info']['Övrig arbetstid']
+        if sheet["AA150"].value: sheet["AA150"] = sheet["AA150"].value + items['info']['Övrig arbetstid']
+        else: sheet["AA150"] = items['info']['Övrig arbetstid']
     
     
     wb.save(os.path.join(os.path.dirname(__file__),"newfile.xlsx"))
@@ -438,6 +487,11 @@ def get_date_range(start_date,end_date):
         all_dates.append(start_date)  # add current date to the list
         start_date += delta
     return all_dates
+
+
+
 if __name__ == '__main__':
+    
     wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Felix.xlsx'))
-    call_functions(wb)
+    wb = call_functions(wb)
+    wb[0].save('newfile.xlsx')
