@@ -111,7 +111,7 @@ def collect_workbook(items,filename):
         file_data = io.BytesIO()
         with open(file_data, 'wb') as f: f.write(l.content)
         file_data.seek(0)
-        wb = openpyxl.load_workbook(file_data)
+        wb = openpyxl.load_workbook(file_data.getvalue())
     else: 
         wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'template.xlsx'))
     return wb, filename
