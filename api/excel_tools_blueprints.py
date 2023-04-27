@@ -10,10 +10,6 @@ def get_excel_file(): #WORKING
     file_content = request.json.get('content')
     file_content=base64.b64decode(file_content)
     file_content=io.BytesIO(file_content).getvalue()
-    mimetype, encoding = mimetypes.guess_type(file_content)
-
-# Print the MIME type
-    print(mimetype)
     excel_file,filename=convert_file_to_workbook(file_content)
     file_content_base64 = base64.b64encode(excel_file.read()).decode('utf-8')
     return jsonify({"content":file_content_base64,"filename":filename})
