@@ -11,7 +11,6 @@ image_resize = Blueprint('image_resize', __name__)
 def post_file():
     """Upload a file and resize it to 300x300 px or specified input"""
     file_content_base64 = request.json['content']
-    print(file_content_base64)
     width = request.json.get('width')
     height = request.json.get('height')
     if not width:width=300
@@ -19,6 +18,6 @@ def post_file():
     width,height = int(width),int(height)
     # decode the base64-encoded file content
     file_content = base64.b64decode(file_content_base64)
-    img_file = resize_and_autoorient(io.BytesIO(file_content), width,height)
+    img_file = resize_and_autoorient(file_content, width,height)
     file_content_base64 = base64.b64encode(img_file.read()).decode('utf-8')
     return jsonify({"content":file_content_base64})
