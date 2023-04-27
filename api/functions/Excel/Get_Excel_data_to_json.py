@@ -277,6 +277,28 @@ def enter_items_into_sheet(wb, items):
                             sheet[index] = km
 
                         break
+    if 'Träd-besiktning' in items['poster'][0].keys() and any([x['Träd-besiktning'] for x in items['poster'] if x!='0']):
+        for cell in excel_range_to_list("A10:A16"):
+            if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
+                sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                index_number = cell[1:]
+  
+                cell_index = [item['column_index'] + index_number for item in items['poster']]
+                for index, besiktartimmar in zip(cell_index,[x['Träd-besiktning'] for x in items['poster']]):
+                    sheet[index] = besiktartimmar
+                break
+            
+        if any([x['km'] for x in items['poster'] if x!='0']):
+                for cell in excel_range_to_list("A18:A24"):
+                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
+                        sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                        
+                        index_number = cell[1:]
+                        cell_index = [item['column_index'] + index_number for item in items['poster']]
+                        for index, km in zip(cell_index,[x['km'] for x in items['poster']]):
+                            sheet[index] = km
+
+                        break
                     
                     
     # SET Platschef Cells AND BYGGMÖTEN
