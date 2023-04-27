@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, send_file,jsonify, abort
 from functions.authentication import require_api_key
 from functions.Excel.Get_Excel_data_to_json import  convert_file_to_workbook
-import os,io,base64, magic
+import os,io,base64, mimetypes
 excel_dagbok = Blueprint('excel_dagbok_trädexperterna', __name__)
 
 @excel_dagbok.route("/api/excel_dagbok", methods=["POST"])
@@ -10,7 +10,10 @@ def get_excel_file(): #WORKING
     file_content = request.json.get('content')
     file_content=base64.b64decode(file_content)
     file_content=io.BytesIO(file_content)
-    print(magic.from_buffer(file_content))
+    mimetype, encoding = mimetypes.guess_type(file_content)
+
+# Print the MIME type
+    print(mimetype)
     excel_file,filename=convert_file_to_workbook(file_content)
     file_content_base64 = base64.b64encode(excel_file.read()).decode('utf-8')
     return jsonify({"content":file_content_base64,"filename":filename})
