@@ -13,10 +13,12 @@ def post_file():
     file_content_base64 = request.json['content']
     width = request.json.get('width')
     height = request.json.get('height')
-
+    if not width:width=300
+    if not height:height=300
+    width,height = int(width),int(height)
     # decode the base64-encoded file content
-    file_content = base64.b64decode(file_content_base64, width,height)
-    img_file = resize_and_autoorient(io.BytesIO(file_content))
+    file_content = base64.b64decode(file_content_base64)
+    img_file = resize_and_autoorient(io.BytesIO(file_content), width,height)
 
     file_content_base64 = base64.b64encode(img_file.read()).decode('utf-8')
     return jsonify({"content":file_content_base64})
