@@ -9,7 +9,7 @@ excel_dagbok = Blueprint('excel_dagbok_trädexperterna', __name__)
 def upload_excel():
     # Get the Excel file attachment from the request
     excel_file = request.files['file']
-    file_content = excel_file.read()
+
 
     # Decode the base64-encoded file content
     decoded_content = base64.b64decode(file_content)
