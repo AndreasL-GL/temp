@@ -122,16 +122,9 @@ def get_dictionary_from_dagbok_sheet(sheet):
 
 def convert_file_to_workbook(bytefile):
     print("------------------------",type(bytefile),'---------------------------------')
-    filename = os.path.join(os.path.join(os.path.dirname(__file__),'temp'),"temp.xlsx")
-    while os.path.exists(filename):
-        filenames = filename.split('.')[0] + '1' + '.xlsx'
-        
-    with open(filenames, 'wb') as f:
-        f.write(bytefile)
-    wb = openpyxl.load_workbook(filenames)
+    wb = openpyxl.load_workbook(bytefile)
 
     wb,filename = call_functions(wb)
-    os.remove(filenames)
     file_data = io.BytesIO()
     wb.save(file_data)
     wb.close()
