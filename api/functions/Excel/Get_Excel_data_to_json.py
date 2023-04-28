@@ -67,7 +67,15 @@ def get_dictionary_from_dagbok_sheet(sheet):
         and not item[sheet['J19'].value] \
         and not item[sheet['K19'].value] \
         and not item[sheet['L19'].value]
+        ## REMOVE THIS
+        print("all_values_empty:", all_values_empty)
+        print("item[sheet['I19'].value]: ", item[sheet['I19'].value])
+        print("item[sheet['J19'].value]: ", item[sheet['J19'].value])
+        print("item[sheet['K19'].value]: ", item[sheet['K19'].value])
+        print("item[sheet['L19'].value]: ", item[sheet['L19'].value])
 
+        ## REMOVE THIS
+        
         if not item[sheet['I19'].value]: item[sheet['I19'].value] = 0
         if not item[sheet['J19'].value]: item[sheet['J19'].value] = 0
         if not item[sheet['K19'].value]: item[sheet['K19'].value] = 0
@@ -81,7 +89,12 @@ def get_dictionary_from_dagbok_sheet(sheet):
         # Om alla värdena är tomma och det ändå står tid skrivet, så sätts variabeln Oberäknad tid till
         # decimalvärdet för tidsskillnaden, dvs. 16:30 - 08:00 = 8.5
         # Med en timma rast: 8.5 - 1 = 7.5
-        if "time" in str(type(item["Slut Kl"]).__repr__) and "time" in str(type(item["Start Kl"]).__repr__) and all_values_empty:
+        print("time" in str(type(item["Slut Kl"]).__repr__) and "time" in str(type(item["Start Kl"]).__repr__))
+        print(type(item["Slut Kl"]) == str)
+        slut_kl_bool="Slut Kl" in item.keys() and item["Slut Kl"]!="None" and all_values_empty
+        start_kl_bool="Start Kl" in item.keys() and item["Start Kl"]!="None" and all_values_empty
+        
+        if start_kl_bool and slut_kl_bool:
             hours = int(item[sheet['F19'].value].split(':')[0])-int(item[sheet['G19'].value].split(':')[0])
             minutes = int(item[sheet['F19'].value].split(':')[1])-int(item[sheet['G19'].value].split(':')[1])
             minutes = minutes/60
@@ -135,8 +148,6 @@ def convert_file_to_workbook(bytefile):
 def collect_workbook(items):
     filename = items["info"]["Månad"] + " - Sammanställning - Trädexperterna"+".xlsx"
     l = download_excel_file("TrdexperternaApplikationer")
-    print(l.content)
-    print(l.status_code)
     if l.status_code == 200:
         file_datas = io.BytesIO(l.content)
         # file_data= io.BytesIO
@@ -457,7 +468,7 @@ def enter_items_into_sheet(wb, items):
                     for index, besiktartimmar in zip(cell_index,[x['Övrigt'] for x in items['poster']]):
                         sheet[index] = besiktartimmar
                     break
-    if 'Oberäknad tid' in items['poster'][0].keys():
+    if "Oberäknad tid" in items['poster'][0].keys():
         if any([x['Oberäknad tid'] for x in items['poster'] if x!='0']):
 
             for cell in excel_range_to_list("A132:A137"):
@@ -520,8 +531,5 @@ if __name__ == '__main__':
     # with open(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'), 'wb') as f:
     #     f.write(data)
     wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'))
-    #wb = call_functions(wb)
-    sheet = wb.active
-    wb = openpyxl.load_workbook(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),'temp.xlsx'))
-    sheet = wb.active
-    wb.save(os.path.join(os.path.dirname(__file__),'newfiile.xlsx'))
+    wb = call_functions(wb)
+    wb[0].close()
