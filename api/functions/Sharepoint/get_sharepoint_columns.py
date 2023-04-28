@@ -54,7 +54,15 @@ def get_fields(site, list_):
     js = get_body_from_sharepoint_api(js)
     return js
 
+
+def get_sites():
+    headers = get_sharepoint_access_headers_through_client_id()
+    url = "https://greenlandscapingmalmo.sharepoint.com/_api/search/query?querytext=%27contentClass:STS_Site%27&trimduplicates=false&selectproperties=%27SiteLogo%2cTitle%27"
+    l = requests.get(url, headers=headers)
+    js = json.loads(l.text)
+    return js
 if __name__ == '__main__':
-    site = "GLMalmAB-EgenkontrollerVellingebostder"
-    list_ = "MKB Egenkontroll Oxie Periodiska 2023"
-    print(get_fields(site,list_))
+   # site = "GLMalmAB-EgenkontrollerVellingebostder"
+    #list_ = "MKB Egenkontroll Oxie Periodiska 2023"
+    #print(get_fields(site,list_))
+    print(json.dumps(get_sites(), indent=3))

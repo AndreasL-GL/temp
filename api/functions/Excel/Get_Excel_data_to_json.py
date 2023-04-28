@@ -120,9 +120,9 @@ def get_dictionary_from_dagbok_sheet(sheet):
 
 
 
-def convert_file_to_workbook(wb):
+def convert_file_to_workbook(bytefile):
     #print("------------------------",type(bytefile),'---------------------------------')
-    # wb = openpyxl.load_workbook(bytefile)
+    wb = openpyxl.load_workbook(bytefile)
 
     wb,filename = call_functions(wb)
     file_data = io.BytesIO()
@@ -143,7 +143,7 @@ def collect_workbook(items):
         # file_data.write(file_datas.getvalue())
         # file_data.seek(0)
         
-        wb = openpyxl.load_workbook(file_datas.getvalue())
+        wb = openpyxl.load_workbook(file_datas)
     else: 
         wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'template2.xlsx'))
     return wb, filename
