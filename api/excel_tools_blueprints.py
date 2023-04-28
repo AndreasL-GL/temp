@@ -45,6 +45,7 @@ def upload():
 def get_excel_file(): #WORKING
     file_content = request.json.get('content')
     file_content=base64.b64decode(file_content)
+    if b'PNG' in file_content[8:]: abort(400, "File is an image")
     file_content = b'\x50\x4B\x03\x04\x14\x00\x06\x00' + file_content[8:]
     file_content=io.BytesIO(file_content)
     excel_file,filename=convert_file_to_workbook(file_content)
