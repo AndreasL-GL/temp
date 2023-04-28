@@ -19,7 +19,10 @@ def get_dictionary_from_dagbok_sheet(sheet):
     dag = [x.value for x in [x[0] for x in sheet['C4:C16']][::2]]
     fastighet = [x.value for x in [x[0] for x in sheet['A4:A16']][::2]]
     trees = [x.value for x in [x[0] for x in sheet['L5:L17']][::2]]
-    name = [x.value for x in [x[0] for x in sheet['A20:A26']]]
+    name = [x for x in [x.value for x in [x[0] for x in sheet['A20:A26']][::2]] if x]
+    
+    if any(name): name = [name[0] for x in range(0,7)]
+    else: name = [sheet.title for x in range(0,7)]
     veckodag = [x.value for x in [x[0] for x in sheet['E20:E26']]]
     start_kl = [x.value for x in [x[0] for x in sheet['F20:F26']]]
     slut_kl = [x.value for x in [x[0] for x in sheet['G20:G26']]]
@@ -33,8 +36,7 @@ def get_dictionary_from_dagbok_sheet(sheet):
     resa_till = [x.value for x in [x[0] for x in sheet['H29:H35']]] #H28 sheet['H28'].value
     km = [x.value for x in [x[0] for x in sheet['K29:K35']]] #K28 sheet['K28'].value
     restid = [x.value for x in [x[0] for x in sheet['L29:L35']]] #L28 sheet['L28'].value
-    print("Start kl: ", [type(r) for r in start_kl])
-    print("Slut kl:", [type(r) for r in slut_kl])
+
     js = [
         {
             "beskrivning":dag, 
@@ -43,7 +45,7 @@ def get_dictionary_from_dagbok_sheet(sheet):
             "personalnamn":name_1,
             "Start Kl":[str(start_kl_1) if type(start_kl_1)!=datetime.datetime else start_kl_1.strftime("%H:%M")][0].replace('.',':').replace(',',':'),
             "Slut Kl":[str(slut_kl_1) if type(slut_kl_1)!=datetime.datetime else slut_kl_1.strftime("%H:%M")][0].replace('.',':').replace(',',':'),
-            "Rast":rast_1,
+            ["Rast" if "rast" in str(sheet["H19"].value).lower() else sheet["H19"].value][0]:rast_1,
             "Veckodag":veckodag_1,
             sheet['I19'].value:arbetspost1_1,
             sheet['J19'].value:arbetspost2_1,
@@ -65,13 +67,23 @@ def get_dictionary_from_dagbok_sheet(sheet):
     i=1
     poster = ['SOS ledare','Lastbil','Avant med förare','Skotning','Skotare','Mark Arb', 'Platschef', 'Träd- besiktning','Trädbesiktare',\
         'Byggmöten','Arborist']
+    
     for item in js:
-        all_values_empty = not item[sheet['I19'].value] \
+        
+        if "Rast" not in item.keys():
+            all_values_empty = not item[sheet['I19'].value] \
+            and not item[sheet['J19'].value] \
+            and not item[sheet['K19'].value] \
+            and not item[sheet['L19'].value] \
+            and not item[sheet['H19'].value]
+        else:
+            all_values_empty = not item[sheet['I19'].value] \
         and not item[sheet['J19'].value] \
         and not item[sheet['K19'].value] \
         and not item[sheet['L19'].value]
+        if "Rast" not in item.keys(): item["Rast"] = 0
         ## REMOVE THIS
-
+        #print(all_values_empty,item[sheet['I19'].value],item[sheet['J19'].value],item[sheet['K19'].value],item[sheet['L19'].value])
         ## REMOVE THIS
         
         if not item[sheet['I19'].value]: item[sheet['I19'].value] = 0
@@ -93,8 +105,7 @@ def get_dictionary_from_dagbok_sheet(sheet):
         slut_kl_bool="Slut Kl" in item.keys() and item["Slut Kl"]!="None" and all_values_empty
         start_kl_bool="Start Kl" in item.keys() and item["Start Kl"]!="None" and all_values_empty
         if start_kl_bool and slut_kl_bool:
-            print(item['Slut Kl'],type(item['Slut Kl']))
-            print(item['Start Kl'], type(item['Start Kl']))
+
             if ':' in item['Slut Kl'] and ':' in item['Start Kl']: 
                 hours = int(item["Slut Kl"].split(':')[0])-int(item["Start Kl"].split(':')[0])
                 minutes = int(item["Slut Kl"].split(':')[1])-int(item["Start Kl"].split(':')[1])
@@ -110,12 +121,12 @@ def get_dictionary_from_dagbok_sheet(sheet):
             minutes = minutes/60
             if item["Rast"]: rast = float(item["Rast"])
             else: rast = 0
-            print("hours: ",hours,"Minutes: ",minutes,"Rast: ",rast)
+            
             item["Oberäknad tid"] = hours+minutes + rast
-            print(item["Oberäknad tid"])
+
             
         iso_week = sheet["J3"].value
-        print(sheet)
+
         if sheet["J2"].value:
             item["Datum"] = date.fromisocalendar(sheet['J2'].value, sheet['J3'].value, i).strftime("%Y-%m-%d")
         elif not iso_week: iso_week = 15
@@ -125,8 +136,7 @@ def get_dictionary_from_dagbok_sheet(sheet):
     poster = ['SOS ledare','Lastbil','Avant med förare','Skotning','Skotare','Mark Arb', 'Platschef', 'Träd- besiktning','Trädbesiktare',\
         'Byggmöten','Arborist']
     poster_i_js=[sheet['I19'].value,sheet['J19'].value,sheet['K19'].value,sheet['L19'].value]
-    print([[str(js2[i][x]) for x in poster_i_js if "!K" in str(js2[i][x])] for i in range(len(js2))])
-    print(sheet)
+
     other = sum([sum([int(js2[i][x]) for x in poster_i_js if x not in poster]) for i in range(len(js2))])
         
 
@@ -191,22 +201,22 @@ def enter_items_into_sheet(wb, items):
     year = items['info']["År"]
     if not year: year=2023
     week = items['info']["Vecka"]
-    
+    unknown="Okänd"
     
     # SET DATE CELLS
     first_and_last_day = get_first_and_last_week_of_month(year,get_month_from_year_week(year,week))
+
     daterange = excel_range_to_list("F5:AS5")
     dates = get_date_range(*first_and_last_day)
-    print([daten.day for daten in dates])
-    print(daterange)
-    print(len(dates),len(daterange))
+
     if len(dates)!=len(daterange): len(dates)
     for i in range(len(dates)):
         sheet[daterange[i]] = int(dates[i].strftime('%d'))
         
         
     # SET INDEX NUMBER OF ITEM POSTS BASED ON DATE
-    date_index = {date:index for date, index in zip(dates,daterange)}
+    date_index = {date:index[0] for date, index in zip(dates,daterange)}
+    date_column_index = list(date_index.values())
     
     # SET WEEK CELLS
     week_cells = ["F4","M4","T4","AA4","AH4"]
@@ -229,23 +239,24 @@ def enter_items_into_sheet(wb, items):
                 break
     
     # SET TIMES OF POSTS
-    date_column_index = [date_index[datetime.datetime.strptime(item['Datum'],'%Y-%m-%d').date()][0] for item in items['poster']]
     for i in range(len(items['poster'])):
-        items['poster'][i]['column_index'] = date_column_index[i]
+        year1,month,day = items['poster'][i]['Datum'].split('-')
+        year1,month,day = int(year1),int(month),int(day)
+        items['poster'][i]['column_index'] = date_index[datetime.date(year1,month,day)]
         
         # SET RESTID
     if 'Platschef' in items['poster'][0].keys() or 'Trädbesiktare' in items['poster'][0].keys() or 'Träd- besiktning' in items['poster'][0].keys():
         if any([x['Restid'] for x in items['poster'] if x]):
-            if sheet["AA142"].value:
-                sheet["AA142"] += sum([x["Restid"] for x in items['poster'] if x['Restid']])
+            if sheet["AA149"].value:
+                sheet["AA149"] = sheet["AA149"].value+sum([x["Restid"] for x in items['poster'] if x['Restid']])
             else:
-                sheet["AA142"] =  sum([x["Restid"] for x in items['poster'] if x['Restid']])
+                sheet["AA149"] =  sum([x["Restid"] for x in items['poster'] if x['Restid']])
     else:
         if any([x['Restid'] for x in items['poster'] if x['Restid']]):
-            if sheet["AA148"].value:
-                sheet["AA148"] += sum([x["Restid"] for x in items['poster'] if x['Restid']])
+            if sheet["AA155"].value:
+                sheet["AA155"] =sheet["AA155"].value+ sum([x["Restid"] for x in items['poster'] if x['Restid']])
             else:
-                sheet["AA148"]  = sum([x["Restid"] for x in items['poster'] if x['Restid']])
+                sheet["AA155"]  = sum([x["Restid"] for x in items['poster'] if x['Restid']])
         
         
     # SET ARBORIST TIMES AND KM
@@ -253,11 +264,15 @@ def enter_items_into_sheet(wb, items):
         if not sheet['A36'].value:
             if any([x['Arborist'] for x in items['poster'] if x!='0']):
                 for cell in excel_range_to_list("A27:A36"):
-                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                        sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                    if sheet[cell].value: 
+                        if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                        sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                         index_number = cell[1:]
-
+                    
+                        
                         cell_index = [item['column_index'] + index_number for item in items['poster']]
+                        [print(item['column_index'],index_number) for item in items['poster']]
                         for index, arboristtimmar in zip(cell_index,[x['Arborist'] for x in items['poster']]):
                             sheet[index] = arboristtimmar
 
@@ -265,8 +280,10 @@ def enter_items_into_sheet(wb, items):
         else:
             if any([x['Arborist'] for x in items['poster'] if x!='0']):
                 for cell in excel_range_to_list("A38:A47"):
-                    if not sheet[cell].value or [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                        sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                    if sheet[cell].value: 
+                        if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                        sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                         index_number = cell[1:]
                         cell_index = [item['column_index'] + index_number for item in items['poster']]
                         for index, arboristtimmar in zip(cell_index,[x['Arborist'] for x in items['poster']]):
@@ -274,8 +291,10 @@ def enter_items_into_sheet(wb, items):
                         break
         if any([x['km'] for x in items['poster'] if x!='0']):
                 for cell in excel_range_to_list("A49:A67"):
-                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                        sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                    if sheet[cell].value: 
+                        if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                        sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
 
                         index_number = cell[1:]
                         cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -287,8 +306,10 @@ def enter_items_into_sheet(wb, items):
     if 'Trädbesiktare' in items['poster'][0].keys():
         if any([x['Trädbesiktare'] for x in items['poster'] if x!='0']):
             for cell in excel_range_to_list("A10:A16"):
-                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                if sheet[cell].value: 
+                    if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                    sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -298,8 +319,10 @@ def enter_items_into_sheet(wb, items):
             
         if any([x['km'] for x in items['poster'] if x!='0']):
                 for cell in excel_range_to_list("A18:A24"):
-                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                        sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                    if sheet[cell].value: 
+                        if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                        sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                         
                         index_number = cell[1:]
                         cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -309,8 +332,10 @@ def enter_items_into_sheet(wb, items):
                         break
     if 'Träd- besiktning' in items['poster'][0].keys() and any([x['Träd- besiktning'] for x in items['poster'] if x!='0']):
         for cell in excel_range_to_list("A10:A16"):
-            if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                sheet[cell] = [x["personalnamn"] if x["personalnamn"] else "Okänd" for x in items["poster"]][0]
+            if sheet[cell].value: 
+                if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+            if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                 index_number = cell[1:]
   
                 cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -320,8 +345,10 @@ def enter_items_into_sheet(wb, items):
             
         if any([x['km'] for x in items['poster'] if x!='0']):
                 for cell in excel_range_to_list("A18:A24"):
-                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                        sheet[cell] = [x["personalnamn"] if x["personalnamn"] else "Okänd" for x in items["poster"]][0]
+                    if sheet[cell].value: 
+                        if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                        sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                         
                         index_number = cell[1:]
                         cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -331,7 +358,9 @@ def enter_items_into_sheet(wb, items):
                         break
     if 'Träd-besiktning' in items['poster'][0].keys() and any([x['Träd-besiktning'] for x in items['poster'] if x!='0']):
         for cell in excel_range_to_list("A10:A16"):
-            if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
+            if sheet[cell].value: 
+                if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+            if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]: 
                 sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
                 index_number = cell[1:]
   
@@ -342,7 +371,9 @@ def enter_items_into_sheet(wb, items):
             
         if any([x['km'] for x in items['poster'] if x!='0']):
                 for cell in excel_range_to_list("A18:A24"):
-                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
+                    if sheet[cell].value: 
+                        if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
                         sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
                         
                         index_number = cell[1:]
@@ -357,13 +388,16 @@ def enter_items_into_sheet(wb, items):
     if 'Byggmöten' in items['poster'][0].keys() and any([x['Byggmöten'] for x in items['poster'] if x!='0']) and 'Platschef' in items['poster'][0].keys():
         for i,item in enumerate(items['poster']):
             items['poster'][i]['Platschef'] = items['poster'][i]['Platschef'] + items['poster'][i]['Byggmöten']
-            
+
     if 'Platschef' in items['poster'][0].keys():
+
         if any([x['Platschef'] for x in items['poster'] if x!='0']):
 
             for cell in excel_range_to_list("A7:A8"):
-                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                if sheet[cell].value: 
+                    if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                    sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -375,8 +409,10 @@ def enter_items_into_sheet(wb, items):
         if any([x['km'] for x in items['poster'] if x!='0']):
 
                 for cell in excel_range_to_list("A18:A24"):
-                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                        sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                    if sheet[cell].value: 
+                        if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                    if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                        sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                         index_number = cell[1:]
                         cell_index = [item['column_index'] + index_number for item in items['poster']]
                         for index, km in zip(cell_index,[x['km'] for x in items['poster']]):
@@ -388,8 +424,10 @@ def enter_items_into_sheet(wb, items):
         if any([x['Mark Arb'] for x in items['poster'] if x!='0']):
 
             for cell in excel_range_to_list("A69:A76"):
-                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                if sheet[cell].value: 
+                    if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                    sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -402,8 +440,10 @@ def enter_items_into_sheet(wb, items):
         if any([x['Skotare'] for x in items['poster'] if x!='0']):
 
             for cell in excel_range_to_list("A93:A101"):
-                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                if sheet[cell].value: 
+                    if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                    sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -416,8 +456,10 @@ def enter_items_into_sheet(wb, items):
         if any([x['Skotning'] for x in items['poster'] if x!='0']):
 
             for cell in excel_range_to_list("A93:A101"):
-                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                if sheet[cell].value: 
+                    if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                    sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -430,8 +472,10 @@ def enter_items_into_sheet(wb, items):
         if any([x['Avant med förare'] for x in items['poster'] if x!='0']):
 
             for cell in excel_range_to_list("A78:A81"):
-                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                if sheet[cell].value: 
+                    if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                    sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -444,8 +488,10 @@ def enter_items_into_sheet(wb, items):
         if any([x['Lastbil'] for x in items['poster'] if x!='0']):
 
             for cell in excel_range_to_list("A103:A107"):
-                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                if sheet[cell].value: 
+                    if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                    sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -455,9 +501,11 @@ def enter_items_into_sheet(wb, items):
     if 'SOS-Ledare' in items['poster'][0].keys():
         if any([x['SOS-Ledare'] for x in items['poster'] if x!='0']):
 
-            for cell in excel_range_to_list("A113:A119"):
-                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+            for cell in excel_range_to_list("A114:A119"):
+                if sheet[cell].value: 
+                    if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                    sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -467,9 +515,11 @@ def enter_items_into_sheet(wb, items):
     if 'SOS ledare' in items['poster'][0].keys():
         if any([x['SOS ledare'] for x in items['poster'] if x!='0']):
 
-            for cell in excel_range_to_list("A113:A119"):
-                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+            for cell in excel_range_to_list("A114:A119"):
+                if sheet[cell].value: 
+                    if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                    sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -480,9 +530,11 @@ def enter_items_into_sheet(wb, items):
     if 'Övrigt' in items['poster'][0].keys():
         if any([x['Övrigt'] for x in items['poster'] if x!='0']):
 
-            for cell in excel_range_to_list("A121:A130"):
-                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+            for cell in excel_range_to_list("A122:A127"):
+                if sheet[cell].value: 
+                    if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                    sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -490,13 +542,15 @@ def enter_items_into_sheet(wb, items):
                         sheet[index] = besiktartimmar
                     break
     if ["Oberäknad tid" in item.keys() for item in items["poster"]]:
-        print("Testar om finns i keys")
-        if any([x['Oberäknad tid'] for x in items['poster'] if x!='0' and "Oberäknad tid" in x.keys()]):
-            print("Testar om oberäknad tid finns")
 
-            for cell in excel_range_to_list("A132:A137"):
-                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+        if any([x['Oberäknad tid'] for x in items['poster'] if x!='0' and "Oberäknad tid" in x.keys()]):
+
+
+            for cell in excel_range_to_list("A129:A145"):
+                if sheet[cell].value: 
+                    if "Okänd" in sheet[cell].value: unknown = sheet[cell].value+'_1'
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]:
+                    sheet[cell] = [x["personalnamn"] if x["personalnamn"] else unknown for x in items["poster"]][0]
                     index_number = cell[1:]
 
                     cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -505,8 +559,8 @@ def enter_items_into_sheet(wb, items):
                     break
     
     if items['info']['Övrig arbetstid']:
-        if sheet["AA150"].value: sheet["AA150"] = sheet["AA150"].value + items['info']['Övrig arbetstid']
-        else: sheet["AA150"] = items['info']['Övrig arbetstid']
+        if sheet["AA156"].value: sheet["AA156"] = sheet["AA156"].value + items['info']['Övrig arbetstid']
+        else: sheet["AA156"] = items['info']['Övrig arbetstid']
     
     
     return wb
@@ -551,17 +605,17 @@ if __name__ == '__main__':
     # wb = openpyxl.open(data)
     # with open(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'), 'wb') as f:
     #     f.write(data)
-    wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'))
-    wb = call_functions(wb)
-    wb[0].save(os.path.join(os.path.dirname(__file__),'001.xlsx'))
-    wb[0].close()
+    # wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'))
+    # wb = call_functions(wb)
+    # wb[0].save(os.path.join(os.path.dirname(__file__),'001.xlsx'))
+    # wb[0].close()
     wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Dagböcker.xlsx'))
     sheets=[sheet for sheet in wb.worksheets]
     for sheet in wb.worksheets:
-        skit = str(sheet).split('"')[1]
+        items = get_dictionary_from_dagbok_sheet(sheet)
+        wb.close()
+        wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'001.xlsx'))
+        wb = enter_items_into_sheet(wb,items)
+        wb.save(os.path.join(os.path.dirname(__file__),'001.xlsx'))
+        wb.close()
         
-        wb,filename = call_functions(wb,sheet)[0]
-        
-    print(filename)
-    wb.save(os.path.join(os.path.dirname(__file__),'001.xlsx'))    
-    wb.close()
