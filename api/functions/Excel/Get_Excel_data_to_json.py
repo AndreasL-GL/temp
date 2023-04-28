@@ -72,10 +72,10 @@ def get_dictionary_from_dagbok_sheet(sheet):
         if not item[sheet['J19'].value]: item[sheet['J19'].value] = 0
         if not item[sheet['K19'].value]: item[sheet['K19'].value] = 0
         if not item[sheet['L19'].value]: item[sheet['L19'].value] = 0
-        if item[sheet['I19'].value] and item[sheet['I19'].value] not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['I19'].value]
-        if item[sheet['J19'].value] and item[sheet['J19'].value] not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['J19'].value]
-        if item[sheet['K19'].value] and item[sheet['K19'].value] not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['K19'].value]
-        if item[sheet['L19'].value] and item[sheet['L19'].value] not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['L19'].value]
+        if sheet['I19'].value and sheet['I19'].value not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['I19'].value]
+        if sheet['J19'].value and sheet['J19'].value not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['J19'].value]
+        if sheet['K19'].value and sheet['K19'].value not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['K19'].value]
+        if sheet['L19'].value and sheet['L19'].value not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['L19'].value]
         if "time" in str(type(item["Start Kl"]).__repr__): item[sheet['F19'].value] = item[sheet['F19'].value].strftime("%H:%M")
         if "time" in str(type(item["Slut Kl"]).__repr__): item[sheet['G19'].value] = item[sheet['G19'].value].strftime("%H:%M")
         # Om alla värdena är tomma och det ändå står tid skrivet, så sätts variabeln Oberäknad tid till
@@ -120,9 +120,9 @@ def get_dictionary_from_dagbok_sheet(sheet):
 
 
 
-def convert_file_to_workbook(bytefile):
-    print("------------------------",type(bytefile),'---------------------------------')
-    wb = openpyxl.load_workbook(bytefile)
+def convert_file_to_workbook(wb):
+    #print("------------------------",type(bytefile),'---------------------------------')
+    # wb = openpyxl.load_workbook(bytefile)
 
     wb,filename = call_functions(wb)
     file_data = io.BytesIO()
@@ -135,9 +135,15 @@ def convert_file_to_workbook(bytefile):
 def collect_workbook(items):
     filename = items["info"]["Månad"] + " - Sammanställning - Trädexperterna"+".xlsx"
     l = download_excel_file("TrdexperternaApplikationer")
-    if "finns inte" not in str(l.content) or "not in" not in str(l.content):
-        file_data = io.BytesIO(l.content)
-        wb = openpyxl.load_workbook(file_data)
+    print(l.content)
+    print(l.status_code)
+    if l.status_code == 200:
+        file_datas = io.BytesIO(l.content)
+        # file_data= io.BytesIO
+        # file_data.write(file_datas.getvalue())
+        # file_data.seek(0)
+        
+        wb = openpyxl.load_workbook(file_datas.getvalue())
     else: 
         wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'template2.xlsx'))
     return wb, filename
@@ -426,6 +432,18 @@ def enter_items_into_sheet(wb, items):
                     for index, besiktartimmar in zip(cell_index,[x['SOS-ledare'] for x in items['poster']]):
                         sheet[index] = besiktartimmar
                     break
+    if 'SOS ledare' in items['poster'][0].keys():
+        if any([x['SOS ledare'] for x in items['poster'] if x!='0']):
+
+            for cell in excel_range_to_list("A113:A119"):
+                if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
+                    sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                    index_number = cell[1:]
+
+                    cell_index = [item['column_index'] + index_number for item in items['poster']]
+                    for index, besiktartimmar in zip(cell_index,[x['SOS ledare'] for x in items['poster']]):
+                        sheet[index] = besiktartimmar
+                    break
                 
     if 'Övrigt' in items['poster'][0].keys():
         if any([x['Övrigt'] for x in items['poster'] if x!='0']):
@@ -489,18 +507,21 @@ def get_date_range(start_date,end_date):
 
 
 if __name__ == '__main__':
-    with open(os.path.join(os.path.dirname(__file__),'Felix.xlsx'), 'rb') as f:
-        data=f.read()
-    import base64
-    print(type(data))
-    data = base64.encodebytes(data)
-    print(data[:100])
-    data = base64.b64decode(data)
-    print(type(data))
-    print(type(data))
-    wb = openpyxl.open(data)
-    with open(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'), 'wb') as f:
-        f.write(data)
+    # with open(os.path.join(os.path.dirname(__file__),'Felix.xlsx'), 'rb') as f:
+    #     data=f.read()
+    # import base64
+    # print(type(data))
+    # data = base64.encodebytes(data)
+    # print(data[:100])
+    # data = base64.b64decode(data)
+    # print(type(data))
+    # print(type(data))
+    # wb = openpyxl.open(data)
+    # with open(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'), 'wb') as f:
+    #     f.write(data)
     wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'))
     #wb = call_functions(wb)
+    sheet = wb.active
+    wb = openpyxl.load_workbook(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),'temp.xlsx'))
+    sheet = wb.active
     wb.save(os.path.join(os.path.dirname(__file__),'newfiile.xlsx'))

@@ -3,6 +3,7 @@ from PIL import Image,ExifTags
 import io, json
 import os
 URL = "http://51.124.105.224/api/" #51.124.105.224
+URL = "http://localhost/api/"
 API_KEY = "ABCDEFG"
 def test_image_resize():
     url = URL+f'image_resizer?filename=filnamn.jpg&API_KEY={API_KEY}&height=500&width=500'
@@ -34,13 +35,19 @@ def test_sharepointv2():
 import base64
 def test_excel_functions():
     url = URL+f'excel_dagbok?application=Dagbok&filename="abcdefg.xlsx"'
-    files = open(os.path.join(os.path.dirname(__file__),'Dagbok (2).xlsx'), 'rb')
-    file_content=base64.b64encode(files.read()).decode('utf-8')
-    files.close()
-    rq = {"content":file_content}
-    x = requests.post(url, rq)
-    with open(os.path.join(os.path.dirname(__file__),'horses.xlsx'), 'wb') as f:
-        f.write(x.content)
+    with open(os.path.join(os.path.dirname(__file__),'Dagbok (2).xlsx'), 'rb') as file:
+        print(url)
+        response = requests.post(url, data=file.read())
+    with open(os.path.join(os.path.dirname(__file__),'result.xlsx'), 'wb') as file:
+        file.write(response.content)
+    fdict = eval(response.content)
+    file = base64.b64decode(fdict["content"])
+    with open(os.path.join(os.path.dirname(__file__),fdict["filename"]), 'wb') as f:
+        f.write(file)
+        
+        
+        
+        
 def test_excel_functions2():
     url = URL+f'excel_dagbok?application=Dagbok&filename="abcdefg.xlsx"'
     
