@@ -44,7 +44,9 @@ def upload():
 @require_api_key
 def get_excel_file(): #WORKING
     file_content = request.json.get('content')
+    print(file_content)
     file_content=base64.b64decode(file_content)
+    print(file_content)
     file_content=io.BytesIO(file_content)
     excel_file,filename=convert_file_to_workbook(file_content)
     file_content_base64 = base64.b64encode(excel_file.read()).decode('utf-8')
