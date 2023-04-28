@@ -122,15 +122,19 @@ def get_dictionary_from_dagbok_sheet(sheet):
 
 def convert_file_to_workbook(bytefile):
     print("------------------------",type(bytefile),'---------------------------------')
-    if not isinstance(bytefile, FileStorage):
-        wb = openpyxl.load_workbook(bytefile)
-    else:
-        bytefile.save(os.path.join(os.path.dirname(__file__),'tempfile.xlsx'))
-        wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'tempfile.xlsx'))
+    filename = os.path.join(os.path.join(os.path.dirname(__file__),'temp'),"temp.xlsx")
+    while os.path.exists(filename):
+        filenames = filename.split('.')[0] + '1' + '.xlsx'
+        
+    with open(filenames, 'wb') as f:
+        f.write(bytefile)
+    wb = openpyxl.load_workbook(filenames)
 
     wb,filename = call_functions(wb)
+    os.remove(filenames)
     file_data = io.BytesIO()
     wb.save(file_data)
+    wb.close()
     file_data.seek(0)
     return file_data,filename
     
@@ -461,6 +465,7 @@ def enter_items_into_sheet(wb, items):
     
     
     wb.save(os.path.join(os.path.dirname(__file__),"newfile.xlsx"))
+    wb.close()
     return wb
     
     
@@ -491,7 +496,18 @@ def get_date_range(start_date,end_date):
 
 
 if __name__ == '__main__':
-    
-    wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Felix.xlsx'))
-    wb = call_functions(wb)
-    wb[0].save('newfile.xlsx')
+    with open(os.path.join(os.path.dirname(__file__),'Felix.xlsx'), 'rb') as f:
+        data=f.read()
+    import base64
+    print(type(data))
+    data = base64.encodebytes(data)
+    print(data[:100])
+    data = base64.b64decode(data)
+    print(type(data))
+    print(type(data))
+    wb = openpyxl.open(data)
+    with open(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'), 'wb') as f:
+        f.write(data)
+    wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'))
+    #wb = call_functions(wb)
+    wb.save(os.path.join(os.path.dirname(__file__),'newfiile.xlsx'))
