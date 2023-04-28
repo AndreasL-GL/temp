@@ -14,6 +14,7 @@ image_resize = Blueprint('image_resize', __name__)
 
 def upload():
     # Get the file from the request
+    print("Hello")
     file = request.files['file']
     wb = openpyxl.load_workbook(file)
     wb.save(os.path.join(os.path.dirname(__file__),'temp.xlsx'))
