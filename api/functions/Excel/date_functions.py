@@ -1,9 +1,5 @@
 import datetime
-def get_first_day_of_first_week(year, week):
-    jan4 = datetime.date(year, 1, 4)
-    delta = datetime.timedelta(days=(week - 1) * 7, weeks=1)
-    result = jan4 - datetime.timedelta(days=jan4.isoweekday() - 1) + delta
-    return result - datetime.timedelta(days=7)
+
 
 
 def get_first_and_last_week_of_month(year, month):
