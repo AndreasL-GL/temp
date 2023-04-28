@@ -44,7 +44,7 @@ def upload():
 @require_api_key
 @excel_dagbok.route("/api/excel_dagbok", methods=["POST"])
 @require_api_key
-def upload(): ## Working
+def upload_try2(): ## Working
     # Get the file from the request
     print(dict(request.headers))
     file_data = request.files
