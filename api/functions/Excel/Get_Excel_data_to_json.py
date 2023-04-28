@@ -33,14 +33,16 @@ def get_dictionary_from_dagbok_sheet(sheet):
     resa_till = [x.value for x in [x[0] for x in sheet['H29:H35']]] #H28 sheet['H28'].value
     km = [x.value for x in [x[0] for x in sheet['K29:K35']]] #K28 sheet['K28'].value
     restid = [x.value for x in [x[0] for x in sheet['L29:L35']]] #L28 sheet['L28'].value
+    print("Start kl: ", [type(r) for r in start_kl])
+    print("Slut kl:", [type(r) for r in slut_kl])
     js = [
         {
             "beskrivning":dag, 
             "fastighet":fastighet, 
             "trees":trees,
             "personalnamn":name_1,
-            "Start Kl":str(start_kl_1),
-            "Slut Kl":str(slut_kl_1),
+            "Start Kl":[str(start_kl_1) if type(start_kl_1)!=datetime.datetime else start_kl_1.strftime("%H:%M")][0].replace('.',':').replace(',',':'),
+            "Slut Kl":[str(slut_kl_1) if type(slut_kl_1)!=datetime.datetime else slut_kl_1.strftime("%H:%M")][0].replace('.',':').replace(',',':'),
             "Rast":rast_1,
             "Veckodag":veckodag_1,
             sheet['I19'].value:arbetspost1_1,
@@ -51,7 +53,8 @@ def get_dictionary_from_dagbok_sheet(sheet):
             "Resa från":resa_from_1,
             "Resa till":resa_till_1,
             "km":km_1,
-            "Restid":restid_1
+            "Restid":restid_1,
+            "Oberäknad tid":0
             } 
         for dag, fastighet, trees, name_1, start_kl_1, slut_kl_1, rast_1,veckodag_1, arbetspost1_1,
         arbetspost2_1,arbetspost3_1,arbetspost4_1,resa_from_1,resa_till_1,km_1,restid_1
@@ -68,11 +71,6 @@ def get_dictionary_from_dagbok_sheet(sheet):
         and not item[sheet['K19'].value] \
         and not item[sheet['L19'].value]
         ## REMOVE THIS
-        print("all_values_empty:", all_values_empty)
-        print("item[sheet['I19'].value]: ", item[sheet['I19'].value])
-        print("item[sheet['J19'].value]: ", item[sheet['J19'].value])
-        print("item[sheet['K19'].value]: ", item[sheet['K19'].value])
-        print("item[sheet['L19'].value]: ", item[sheet['L19'].value])
 
         ## REMOVE THIS
         
@@ -80,37 +78,56 @@ def get_dictionary_from_dagbok_sheet(sheet):
         if not item[sheet['J19'].value]: item[sheet['J19'].value] = 0
         if not item[sheet['K19'].value]: item[sheet['K19'].value] = 0
         if not item[sheet['L19'].value]: item[sheet['L19'].value] = 0
-        if sheet['I19'].value and sheet['I19'].value not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['I19'].value]
-        if sheet['J19'].value and sheet['J19'].value not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['J19'].value]
-        if sheet['K19'].value and sheet['K19'].value not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['K19'].value]
-        if sheet['L19'].value and sheet['L19'].value not in poster: item["Övrigt"]=item["Övrigt"]+item[sheet['L19'].value]
+        try:
+            if sheet['I19'].value and sheet['I19'].value not in poster: item["Övrigt"]=item["Övrigt"]+int(item[sheet['I19'].value])
+            if sheet['J19'].value and sheet['J19'].value not in poster: item["Övrigt"]=item["Övrigt"]+int(item[sheet['J19'].value])
+            if sheet['K19'].value and sheet['K19'].value not in poster: item["Övrigt"]=item["Övrigt"]+int(item[sheet['K19'].value])
+            if sheet['L19'].value and sheet['L19'].value not in poster: item["Övrigt"]=item["Övrigt"]+int(item[sheet['L19'].value])
+        except Exception as e:
+            print(e)
         if "time" in str(type(item["Start Kl"]).__repr__): item[sheet['F19'].value] = item[sheet['F19'].value].strftime("%H:%M")
         if "time" in str(type(item["Slut Kl"]).__repr__): item[sheet['G19'].value] = item[sheet['G19'].value].strftime("%H:%M")
         # Om alla värdena är tomma och det ändå står tid skrivet, så sätts variabeln Oberäknad tid till
         # decimalvärdet för tidsskillnaden, dvs. 16:30 - 08:00 = 8.5
         # Med en timma rast: 8.5 - 1 = 7.5
-        print("time" in str(type(item["Slut Kl"]).__repr__) and "time" in str(type(item["Start Kl"]).__repr__))
-        print(type(item["Slut Kl"]) == str)
         slut_kl_bool="Slut Kl" in item.keys() and item["Slut Kl"]!="None" and all_values_empty
         start_kl_bool="Start Kl" in item.keys() and item["Start Kl"]!="None" and all_values_empty
-        
         if start_kl_bool and slut_kl_bool:
-            hours = int(item[sheet['F19'].value].split(':')[0])-int(item[sheet['G19'].value].split(':')[0])
-            minutes = int(item[sheet['F19'].value].split(':')[1])-int(item[sheet['G19'].value].split(':')[1])
+            print(item['Slut Kl'],type(item['Slut Kl']))
+            print(item['Start Kl'], type(item['Start Kl']))
+            if ':' in item['Slut Kl'] and ':' in item['Start Kl']: 
+                hours = int(item["Slut Kl"].split(':')[0])-int(item["Start Kl"].split(':')[0])
+                minutes = int(item["Slut Kl"].split(':')[1])-int(item["Start Kl"].split(':')[1])
+            elif ':' in item['Slut Kl'] and not ':' in item['Start Kl']:
+                hours = int(item["Slut Kl"].split(':')[0]) -int(item["Start Kl"])
+                minutes = 0
+            elif ':' in item['Start Kl'] and not ':' in item['Slut Kl']:
+                hours = int(item["Slut Kl"]) -int(item["Start Kl"].split(':')[0])
+                minutes = 0
+            else: 
+                hours = int(item["Slut Kl"]) -int(item["Start Kl"])
+                minutes = 0
             minutes = minutes/60
             if item["Rast"]: rast = float(item["Rast"])
             else: rast = 0
+            print("hours: ",hours,"Minutes: ",minutes,"Rast: ",rast)
             item["Oberäknad tid"] = hours+minutes + rast
+            print(item["Oberäknad tid"])
             
+        iso_week = sheet["J3"].value
+        print(sheet)
         if sheet["J2"].value:
             item["Datum"] = date.fromisocalendar(sheet['J2'].value, sheet['J3'].value, i).strftime("%Y-%m-%d")
-        else: item["Datum"] = date.fromisocalendar(2023, sheet['J3'].value, i).strftime("%Y-%m-%d")
+        elif not iso_week: iso_week = 15
+        else: item["Datum"] = date.fromisocalendar(2023, iso_week, i).strftime("%Y-%m-%d")
         i+=1
         js2.append(item)
     poster = ['SOS ledare','Lastbil','Avant med förare','Skotning','Skotare','Mark Arb', 'Platschef', 'Träd- besiktning','Trädbesiktare',\
         'Byggmöten','Arborist']
     poster_i_js=[sheet['I19'].value,sheet['J19'].value,sheet['K19'].value,sheet['L19'].value]
-    other = sum([sum([js2[i][x] for x in poster_i_js if x not in poster]) for i in range(len(js2))])
+    print([[str(js2[i][x]) for x in poster_i_js if "!K" in str(js2[i][x])] for i in range(len(js2))])
+    print(sheet)
+    other = sum([sum([int(js2[i][x]) for x in poster_i_js if x not in poster]) for i in range(len(js2))])
         
 
 
@@ -159,8 +176,8 @@ def collect_workbook(items):
         wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'template2.xlsx'))
     return wb, filename
 
-def call_functions(wb):
-    sheet = wb.active
+def call_functions(wb, sheet=None):
+    if not sheet:sheet = wb.active
     items = get_dictionary_from_dagbok_sheet(sheet)
     wb,filename = collect_workbook(items)
     wb = enter_items_into_sheet(wb,items)
@@ -178,10 +195,14 @@ def enter_items_into_sheet(wb, items):
     
     # SET DATE CELLS
     first_and_last_day = get_first_and_last_week_of_month(year,get_month_from_year_week(year,week))
-    daterange = excel_range_to_list("F5:AN5")
+    daterange = excel_range_to_list("F5:AS5")
     dates = get_date_range(*first_and_last_day)
-    for i,cell in enumerate(daterange):
-        sheet[cell] = int(dates[i].strftime('%d'))
+    print([daten.day for daten in dates])
+    print(daterange)
+    print(len(dates),len(daterange))
+    if len(dates)!=len(daterange): len(dates)
+    for i in range(len(dates)):
+        sheet[daterange[i]] = int(dates[i].strftime('%d'))
         
         
     # SET INDEX NUMBER OF ITEM POSTS BASED ON DATE
@@ -289,7 +310,7 @@ def enter_items_into_sheet(wb, items):
     if 'Träd- besiktning' in items['poster'][0].keys() and any([x['Träd- besiktning'] for x in items['poster'] if x!='0']):
         for cell in excel_range_to_list("A10:A16"):
             if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                sheet[cell] = [x["personalnamn"] if x["personalnamn"] else "Okänd" for x in items["poster"]][0]
                 index_number = cell[1:]
   
                 cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -300,7 +321,7 @@ def enter_items_into_sheet(wb, items):
         if any([x['km'] for x in items['poster'] if x!='0']):
                 for cell in excel_range_to_list("A18:A24"):
                     if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
-                        sheet[cell] = [x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]
+                        sheet[cell] = [x["personalnamn"] if x["personalnamn"] else "Okänd" for x in items["poster"]][0]
                         
                         index_number = cell[1:]
                         cell_index = [item['column_index'] + index_number for item in items['poster']]
@@ -468,8 +489,10 @@ def enter_items_into_sheet(wb, items):
                     for index, besiktartimmar in zip(cell_index,[x['Övrigt'] for x in items['poster']]):
                         sheet[index] = besiktartimmar
                     break
-    if "Oberäknad tid" in items['poster'][0].keys():
-        if any([x['Oberäknad tid'] for x in items['poster'] if x!='0']):
+    if ["Oberäknad tid" in item.keys() for item in items["poster"]]:
+        print("Testar om finns i keys")
+        if any([x['Oberäknad tid'] for x in items['poster'] if x!='0' and "Oberäknad tid" in x.keys()]):
+            print("Testar om oberäknad tid finns")
 
             for cell in excel_range_to_list("A132:A137"):
                 if not sheet[cell].value or sheet[cell].value ==[x["personalnamn"] for x in items["poster"] if x["personalnamn"]][0]: 
@@ -486,8 +509,6 @@ def enter_items_into_sheet(wb, items):
         else: sheet["AA150"] = items['info']['Övrig arbetstid']
     
     
-    wb.save(os.path.join(os.path.dirname(__file__),"newfile.xlsx"))
-    wb.close()
     return wb
     
     
@@ -532,4 +553,15 @@ if __name__ == '__main__':
     #     f.write(data)
     wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'))
     wb = call_functions(wb)
+    wb[0].save(os.path.join(os.path.dirname(__file__),'001.xlsx'))
     wb[0].close()
+    wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Dagböcker.xlsx'))
+    sheets=[sheet for sheet in wb.worksheets]
+    for sheet in wb.worksheets:
+        skit = str(sheet).split('"')[1]
+        
+        wb,filename = call_functions(wb,sheet)[0]
+        
+    print(filename)
+    wb.save(os.path.join(os.path.dirname(__file__),'001.xlsx'))    
+    wb.close()
