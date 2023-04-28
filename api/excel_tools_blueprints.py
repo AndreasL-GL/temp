@@ -6,9 +6,19 @@ excel_dagbok = Blueprint('excel_dagbok_trädexperterna', __name__)
 
 @excel_dagbok.route("/api/excel_dagbok", methods=["POST"])
 @require_api_key
-  
-  
- 
+def upload():
+    # Get the file from the request
+    file_data = request.get_data()
+    file = io.BytesIO(file_data)
+
+    # Load the workbook
+    wb = openpyxl.load_workbook(file)
+    wb.save(os.path.join(os.path.dirname(__file__),'temp.xlsx'))
+
+    # Do whatever you need to do with the workbook here
+    # ...
+
+    return jsonify({"content": "Hello"}) 
 def upload():
     # Get the file from the request
     print("Hello")
