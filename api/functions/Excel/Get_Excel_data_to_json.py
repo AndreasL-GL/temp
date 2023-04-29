@@ -200,8 +200,9 @@ def collect_workbook(items):
 def call_functions(wb, sheet=None):
     if not sheet:sheet = wb.active
     items = get_dictionary_from_dagbok_sheet(sheet)
-    with open(os.path.join(os.path.join(os.path.dirname(__file__),'items trädexperterna'),items["info"]["Boktitel"]+' '+items["info"]["Första dag i veckan"]+'.json'),'w') as f:
-            jitems = stringify_dict(items)
+    jitems = stringify_dict(items)
+    with open(os.path.join(os.path.join(os.path.dirname(__file__),'items trädexperterna'),jitems["info"]["Boktitel"]+' '+jitems["info"]["Första dag i veckan"]+'.json'),'w') as f:
+            
             json.dump(jitems,f)
     wb,filename = collect_workbook(items)
     wb = enter_items_into_sheet(wb,items)
