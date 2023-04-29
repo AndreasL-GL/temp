@@ -9,12 +9,14 @@ if __name__ == '__main__':
     from date_functions import get_month_from_week, get_month_name_from_number, first_day_from_week
     import io
     from save_file_on_error import save_file_on_error
+    from Fix_Excel_files import fix_excel_file
     
 else:
     from functions.Excel.date_functions import get_first_and_last_week_of_month, get_month_from_year_week, get_week_numbers
     from functions.Excel.date_functions import get_month_from_week, get_month_name_from_number, first_day_from_week
     import io
     from functions.Excel.get_excel_file import download_excel_file
+    from functions.Excel.Fix_Excel_files import fix_excel_file
     from tools_get_files import save_file_on_error
 
 def get_dictionary_from_dagbok_sheet(sheet):
@@ -180,6 +182,7 @@ def convert_file_to_workbook(bytefile):
     wb.save(file_data)
     wb.close()
     file_data.seek(0)
+    file_data = fix_excel_file(file_data.read())
     return file_data,filename
     
     
@@ -660,10 +663,11 @@ if __name__ == '__main__':
         wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'001.xlsx'))
         wb = enter_items_into_sheet(wb,items)
         items = stringify_dict(items)
-        
-        with open(os.path.join(os.path.join(os.path.dirname(__file__),'items'),items["info"]["Boktitel"]+' '+items["info"]["Första dag i veckan"]+'.json'),'w') as f:
-            json.dump(items,f)
-    
+        file = io.BytesIO()
+        wb.save(file)
+        file.seek(0)
+        file = fix_excel_file(file.read())
+        wb=openpyxl.load_workbook(io.BytesIO(file))
         wb.save(os.path.join(os.path.dirname(__file__),'001.xlsx'))
         wb.close()
         
