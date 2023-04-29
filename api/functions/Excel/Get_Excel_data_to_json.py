@@ -203,7 +203,7 @@ def call_functions(wb, sheet=None):
     jitems = stringify_dict(items)
     with open(os.path.join(os.path.join(os.path.dirname(__file__),'items trädexperterna'),jitems["info"]["Boktitel"]+' '+jitems["info"]["Första dag i veckan"]+'.json'),'w') as f:
             
-            json.dump(jitems,f)
+            json.dump(jitems,f, ensure_ascii=False, indent=4)
     wb,filename = collect_workbook(items)
     wb = enter_items_into_sheet(wb,items)
     return wb,filename

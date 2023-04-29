@@ -6,7 +6,7 @@ services:
     command: gunicorn --bind 0.0.0.0:80 app:app
     volumes: 
     - ./api:/usr/src/app/
-    - /usr/src/app/functions/excel/items trädexperterna:/home/azureuser/items/trädexperterna
+    
     ports:
     - 5000:5000
   nginx:
