@@ -2,16 +2,19 @@ import openpyxl
 import os
 from datetime import date
 import datetime
+
 if __name__ == '__main__':
     from date_functions import get_first_and_last_week_of_month, get_month_from_year_week, get_week_numbers
     from date_functions import get_month_from_week, get_month_name_from_number
     import io
     from get_excel_file import download_excel_file
+    from ...tools_get_files import save_file_on_error
 else:
     from functions.Excel.date_functions import get_first_and_last_week_of_month, get_month_from_year_week, get_week_numbers
     from functions.Excel.date_functions import get_month_from_week, get_month_name_from_number
     import io
     from functions.Excel.get_excel_file import download_excel_file
+    from tools_get_files import save_file_on_error
 from werkzeug.datastructures import FileStorage
 
 def get_dictionary_from_dagbok_sheet(sheet):
@@ -159,7 +162,7 @@ def get_dictionary_from_dagbok_sheet(sheet):
     return results
 
 
-
+@save_file_on_error
 def convert_file_to_workbook(bytefile):
     #print("------------------------",type(bytefile),'---------------------------------')
     wb = openpyxl.load_workbook(bytefile)
@@ -174,7 +177,7 @@ def convert_file_to_workbook(bytefile):
     
 def collect_workbook(items):
     filename = items["info"]["Månad"] + " - Sammanställning - Trädexperterna"+".xlsx"
-    l = download_excel_file("TrdexperternaApplikationer")
+    l = download_excel_file("TrdexperternaApplikationer",filename)
     if l.status_code == 200:
         file_datas = io.BytesIO(l.content)
         # file_data= io.BytesIO

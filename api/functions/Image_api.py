@@ -4,7 +4,10 @@ import configparser
 from flask import request
 config = configparser.ConfigParser()
 config.read(os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)),'config'),"config.ini"))
-
+if __name__ == '__main__':
+    from ..tools_get_files import save_file_on_error
+else:
+    from tools_get_files import save_file_on_error
 
 
 def autoorient(image):
@@ -39,7 +42,7 @@ def autoorient(image):
 
 
     return image
-
+@save_file_on_error
 def resize_and_autoorient(file, height,width):
     """Accepts a file bytes object and returns a file bytes object
     Resizes an image based on specifications in the config."""

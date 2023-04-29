@@ -33,10 +33,10 @@ def get_sharepoint_access_headers_through_client_id():
 }
     return headers
 
-def download_excel_file(site):
+def download_excel_file(site,filename):
     headers=get_sharepoint_access_headers_through_client_id()
     tenant = "greenlandscapingmalmo"
-    filename="2023-04 - Sammanställning - Trädexperterna.xlsx"
+
     server_relative_url = f"/sites/{site}/Delade Dokument/Sammanställningar/{filename}"
     url = f"https://{tenant}.sharepoint.com/sites/{site}/_api/web/GetFileByServerRelativeUrl('{server_relative_url}')/$value"
     l = requests.get(url, headers=headers)
