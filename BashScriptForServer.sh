@@ -1,5 +1,5 @@
 cd ~
-smkdir -p ~/items/trädexperterna
+mkdir -p ~/items/trädexperterna
 container_id=$(sudo docker container ls -f name=api -q)
 sudo docker container cp  $container_id:/usr/src/app/functions/Excel/items_trädexperterna/. ~/items/trädexperterna/
 sudo docker compose down
