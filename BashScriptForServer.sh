@@ -1,6 +1,6 @@
 cd ~
-if [ ! -d ~/items/trädgårdsexperterna ]; then
-  mkdir -p ~/items/trädgårdsexperterna
+if [ ! -d ~/items/trädexperterna ]; then
+  mkdir -p ~/items/trädexperterna
 fi
 container_id=$(sudo docker container ls -f name=api -q)
 sudo docker container cp  $container_id:/usr/src/app/functions/Excel/items_trädexperterna/ ~/items/trädexperterna/.
