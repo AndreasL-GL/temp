@@ -2,20 +2,20 @@ import openpyxl
 import os
 from datetime import date
 import datetime
+import json
 
 if __name__ == '__main__':
     from date_functions import get_first_and_last_week_of_month, get_month_from_year_week, get_week_numbers
-    from date_functions import get_month_from_week, get_month_name_from_number
+    from date_functions import get_month_from_week, get_month_name_from_number, first_day_from_week
     import io
-    from get_excel_file import download_excel_file
-    from ...tools_get_files import save_file_on_error
+    from save_file_on_error import save_file_on_error
+    
 else:
     from functions.Excel.date_functions import get_first_and_last_week_of_month, get_month_from_year_week, get_week_numbers
-    from functions.Excel.date_functions import get_month_from_week, get_month_name_from_number
+    from functions.Excel.date_functions import get_month_from_week, get_month_name_from_number, first_day_from_week
     import io
     from functions.Excel.get_excel_file import download_excel_file
     from tools_get_files import save_file_on_error
-from werkzeug.datastructures import FileStorage
 
 def get_dictionary_from_dagbok_sheet(sheet):
     "Creates a dictionary from a dagbook excel sheet"
@@ -85,9 +85,7 @@ def get_dictionary_from_dagbok_sheet(sheet):
         and not item[sheet['K19'].value] \
         and not item[sheet['L19'].value]
         if "Rast" not in item.keys(): item["Rast"] = 0
-        ## REMOVE THIS
-        #print(all_values_empty,item[sheet['I19'].value],item[sheet['J19'].value],item[sheet['K19'].value],item[sheet['L19'].value])
-        ## REMOVE THIS
+    
         
         if not item[sheet['I19'].value]: item[sheet['I19'].value] = 0
         if not item[sheet['J19'].value]: item[sheet['J19'].value] = 0
@@ -148,23 +146,33 @@ def get_dictionary_from_dagbok_sheet(sheet):
             "info":{
                 "Kontrakt nr":sheet['G2'].value,
                 "Bandel":sheet['G3'].value,
-                "År":sheet['J2'].value,
+                "År":[sheet['J2'].value if sheet['J2'].value else datetime.datetime.now().year][0],
                 "Vecka":sheet['J3'].value,
                 "Lag nr":sheet['L2'].value,
                 "Dag":sheet['L3'].value,
                 "Dagboksnamn":sheet['D1'].value,
-                "Övrig arbetstid":other
+                "Övrig arbetstid":other,
+                "Boktitel":sheet.title
             },
             "poster":js2
         }
+    results["info"]["Första dag i veckan"] = first_day_from_week(results["info"]["År"], results["info"]["Vecka"])
+    print("Första dag i veckan: ", results["info"]["Första dag i veckan"])
     results["info"]["Sammanställning"]=sum([float(item[sheet['I19'].value]) + float(item[sheet['J19'].value]) + float(item[sheet['K19'].value]) + float(item[sheet['L19'].value]) for item in results['poster']])
     results["info"]["Månad"] = get_month_from_week(results["info"]["År"], results["info"]["Vecka"])
     return results
-
+def split_daterange_elements(element):
+    letters = ""
+    numbers = ""
+    for char in element:
+        if char.isalpha():
+            letters += char
+        elif char.isdigit():
+            numbers += char
+    return (letters, numbers)
 
 @save_file_on_error
 def convert_file_to_workbook(bytefile):
-    #print("------------------------",type(bytefile),'---------------------------------')
     wb = openpyxl.load_workbook(bytefile)
 
     wb,filename = call_functions(wb)
@@ -192,6 +200,9 @@ def collect_workbook(items):
 def call_functions(wb, sheet=None):
     if not sheet:sheet = wb.active
     items = get_dictionary_from_dagbok_sheet(sheet)
+    with open(os.path.join(os.path.join(os.path.dirname(__file__),'items trädexperterna'),items["info"]["Boktitel"]+' '+items["info"]["Första dag i veckan"]+'.json'),'w') as f:
+            jitems = stringify_dict(items)
+            json.dump(jitems,f)
     wb,filename = collect_workbook(items)
     wb = enter_items_into_sheet(wb,items)
     return wb,filename
@@ -208,22 +219,33 @@ def enter_items_into_sheet(wb, items):
     
     # SET DATE CELLS
     first_and_last_day = get_first_and_last_week_of_month(year,get_month_from_year_week(year,week))
-
     daterange = excel_range_to_list("F5:AS5")
     dates = get_date_range(*first_and_last_day)
-
     if len(dates)!=len(daterange): len(dates)
+    print(first_and_last_day)
+    print(week)
+    print(items["info"]["Månad"])
     for i in range(len(dates)):
         sheet[daterange[i]] = int(dates[i].strftime('%d'))
         
-        
     # SET INDEX NUMBER OF ITEM POSTS BASED ON DATE
+    new_lst = []
+    for element in daterange:
+        new_tuple=split_daterange_elements(element)
+        new_lst.append(new_tuple)
+    daterange=new_lst
+    if any([int(x[1]) > 200 for x in daterange]):
+        [print(x[1]) > 200 for x in daterange]
     date_index = {date:index[0] for date, index in zip(dates,daterange)}
-    date_column_index = list(date_index.values())
+    
     
     # SET WEEK CELLS
     week_cells = ["F4","M4","T4","AA4","AH4"]
     weeks = get_week_numbers(dates)
+    weeks.sort()
+    print(weeks)
+    print(week_cells)
+    week_cells=week_cells[:len(weeks)]
     for i,cell in enumerate(week_cells):
         sheet[cell] = "V " + str(weeks[i])
         
@@ -242,10 +264,13 @@ def enter_items_into_sheet(wb, items):
                 break
     
     # SET TIMES OF POSTS
+
     for i in range(len(items['poster'])):
         year1,month,day = items['poster'][i]['Datum'].split('-')
+        
         year1,month,day = int(year1),int(month),int(day)
         items['poster'][i]['column_index'] = date_index[datetime.date(year1,month,day)]
+
         
         # SET RESTID
     if 'Platschef' in items['poster'][0].keys() or 'Trädbesiktare' in items['poster'][0].keys() or 'Träd- besiktning' in items['poster'][0].keys():
@@ -275,7 +300,6 @@ def enter_items_into_sheet(wb, items):
                     
                         
                         cell_index = [item['column_index'] + index_number for item in items['poster']]
-                        [print(item['column_index'],index_number) for item in items['poster']]
                         for index, arboristtimmar in zip(cell_index,[x['Arborist'] for x in items['poster']]):
                             sheet[index] = arboristtimmar
 
@@ -594,31 +618,51 @@ def get_date_range(start_date,end_date):
     return all_dates
 
 
+def stringify_dict(d):
+    """
+    Recursively converts all keys and values of a dictionary to string data type.
+
+    Args:
+        d (dict): The dictionary to be converted.
+
+    Returns:
+        dict: The new dictionary with all keys and values converted to strings.
+    """
+    new_dict = {}
+    for k, v in d.items():
+        if isinstance(k, datetime.date):
+            k = k.strftime('%Y-%m-%d')
+        elif isinstance(k, datetime.time):
+            k = k.strftime('%H:%M:%S')
+        elif isinstance(k, (int, float)):
+            k = str(k)
+        if isinstance(v, dict):
+            v = stringify_dict(v)
+        elif isinstance(v, (list, set, tuple)):
+            v = [stringify_dict(item) if isinstance(item, dict) else str(item) for item in v]
+        elif isinstance(v, datetime.date):
+            v = v.strftime('%Y-%m-%d')
+        elif isinstance(v, datetime.time):
+            v = v.strftime('%H:%M:%S')
+        elif isinstance(v, (int, float)):
+            v = str(v)
+        new_dict[str(k)] = v
+    return new_dict
+
+
 
 if __name__ == '__main__':
-    # with open(os.path.join(os.path.dirname(__file__),'Felix.xlsx'), 'rb') as f:
-    #     data=f.read()
-    # import base64
-    # print(type(data))
-    # data = base64.encodebytes(data)
-    # print(data[:100])
-    # data = base64.b64decode(data)
-    # print(type(data))
-    # print(type(data))
-    # wb = openpyxl.open(data)
-    # with open(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'), 'wb') as f:
-    #     f.write(data)
-    # wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Felixx.xlsx'))
-    # wb = call_functions(wb)
-    # wb[0].save(os.path.join(os.path.dirname(__file__),'001.xlsx'))
-    # wb[0].close()
     wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'Dagböcker.xlsx'))
-    sheets=[sheet for sheet in wb.worksheets]
     for sheet in wb.worksheets:
         items = get_dictionary_from_dagbok_sheet(sheet)
         wb.close()
         wb = openpyxl.load_workbook(os.path.join(os.path.dirname(__file__),'001.xlsx'))
         wb = enter_items_into_sheet(wb,items)
+        items = stringify_dict(items)
+        
+        with open(os.path.join(os.path.join(os.path.dirname(__file__),'items'),items["info"]["Boktitel"]+' '+items["info"]["Första dag i veckan"]+'.json'),'w') as f:
+            json.dump(items,f)
+    
         wb.save(os.path.join(os.path.dirname(__file__),'001.xlsx'))
         wb.close()
         
