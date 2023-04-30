@@ -3,7 +3,7 @@ from PIL import Image,ExifTags
 import io, json
 import os
 URL = "http://51.124.105.224/api/" #51.124.105.224
-URL = "http://localhost/api/"
+#URL = "http://localhost/api/"
 API_KEY = "ABCDEFG"
 def test_image_resize():
     url = URL+f'image_resizer?filename=filnamn.jpg&API_KEY={API_KEY}&height=500&width=500'
@@ -59,12 +59,11 @@ def test_excel_functions2():
 
 def test_Word_functions():
     url = URL + f'word_dokument_for_protokoll?API_KEY=ABCDEFG'
+    print(url)
     with open('ActionOutputs (2).json', 'r', encoding="utf-8") as f:
         js = json.load(f)
-    print(js.keys())
     rs = requests.post(url, json.dumps(js), headers={"Content-Type": "application/json"})
     base64_file = json.loads(rs.content)["content"]
-    print(rs.content)
     #with open('Test2.docx', 'wb') as f:
     #    f.write(base64_file)
     #print("-----------------------------------------------",base64_file.keys())

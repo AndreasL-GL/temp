@@ -17,6 +17,15 @@ else:
 
 
 def add_template_data(file, tbl):
+    """ Adds the data into the template file that needs to be added with MailMerge. This is the Table without the images.
+
+    Args:
+        file (BytesIO): Document file, downloaded from sharepoint-site.
+        tbl (dict): Json-dictionary contained in the request body.
+
+    Returns:
+        _type_: returns a BytesIO object to be opened by python-docx.
+    """
     doc = mailmerge.MailMerge(file)
     content= tbl["content"]
     info = {k:v for k,v in tbl.items() if k!="content"}
@@ -33,7 +42,10 @@ def add_template_data(file, tbl):
     doc.write(file)
     file.seek(0)
     return file
+
+
 def add_images_to_doc(file,tbl):
+    """Adds all the image rows with the accompanying test per the template we used before."""
     doc = docx.Document(file)
     
     doc.add_page_break()
@@ -58,8 +70,11 @@ def add_images_to_doc(file,tbl):
     return doc
 
 def change_icon_in_header(doc):
-    img = Image.open("bild2.jpg")
-    img = img.resize((100,100))
+    """Changes the icon in the header of a word file by replacing a pre-formatted placeholder image."""
+    l = get_template.Download_icon()
+    file_content = io.BytesIO(l.content)
+    file_content.seek(0)
+    img = Image.open(file_content)
     fb = io.BytesIO()
     img.save(fb, 'PNG')
     fb.seek(0)
@@ -71,21 +86,23 @@ def change_icon_in_header(doc):
     return doc
 
 def run_functions(js):
+    """Runs all the different functions. Takes json as input, returns a json with file-content and filename."""
+    kontrollmoment = get_template.get_fields()
+    js["Kontrollmoment"] = kontrollmoment
     js = create_json.create_json_for_word_functions(js)
     file= download_template_file()
     file = add_template_data(file, js)
     doc = add_images_to_doc(file, js)
-    #doc = change_icon_in_header(doc)
-    doc.save('gfg.docx')
+    doc = change_icon_in_header(doc)
     file_content = io.BytesIO()
     doc.save(file_content)
     file_content.seek(0)
     file_content=base64.b64encode(file_content.getvalue()).decode('utf-8')
-    return {"content":file_content, "filename": "filename.docx"}
+    return {"content":file_content, "filename": js["Title"]+" Vecka "+js["Vecka"]+'.docx'}
 
 def download_template_file():
+    """Downloads the word template for this program."""
     l = get_template.Download_template("","word_template.docx")
-    print(type(l.content))
     file_content = io.BytesIO(l.content)
     file_content.seek(0)
     return file_content

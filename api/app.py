@@ -32,7 +32,6 @@ def help():
 def limit_remote_addr():
     print(config["ACCEPT_CONNECTIONS_FROM"])
     client_list = [x for x in config["ACCEPT_CONNECTIONS_FROM"]]
-    
     if any(client_list):
         if any(client_list) and request.remote_addr not in client_list:
             abort(403)  # Forbidden
