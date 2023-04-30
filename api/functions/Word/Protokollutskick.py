@@ -87,6 +87,7 @@ def change_icon_in_header(doc):
 
 def run_functions(js):
     """Runs all the different functions. Takes json as input, returns a json with file-content and filename."""
+    title = js["Title"]
     kontrollmoment = get_template.get_fields()
     js["Kontrollmoment"] = kontrollmoment
     js = create_json.create_json_for_word_functions(js)
@@ -98,7 +99,7 @@ def run_functions(js):
     doc.save(file_content)
     file_content.seek(0)
     file_content=base64.b64encode(file_content.getvalue()).decode('utf-8')
-    return {"content":file_content, "filename": js["Title"]+" Vecka "+js["Vecka"]+'.docx'}
+    return {"content":file_content, "filename": title+" Vecka "+js["Vecka"]+'.docx'}
 
 def download_template_file():
     """Downloads the word template for this program."""
