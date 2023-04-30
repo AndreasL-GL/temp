@@ -3,7 +3,7 @@ from functions.authentication import require_api_key
 from functions.Excel.Get_Excel_data_to_json import  convert_file_to_workbook
 import os,io,base64, openpyxl
 from tools_get_files import save_file_on_error
-excel_dagbok = Blueprint('excel_dagbok_trädexperterna', __name__)
+excel_dagbok = Blueprint('dagbok_trädexperterna', __name__)
 
 @excel_dagbok.route("/api/excel_dagbok", methods=["POST"])
 @require_api_key

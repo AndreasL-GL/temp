@@ -55,4 +55,22 @@ def test_excel_functions2():
     im = requests.post(url, files=files)
     with open(os.path.join(os.path.dirname(__file__),'horse.xlsx'), 'wb') as f:
         f.write(im.content)
-test_excel_functions()
+#test_excel_functions()
+
+def test_Word_functions():
+    url = URL + f'word_dokument_for_protokoll?API_KEY=ABCDEFG'
+    with open('ActionOutputs (2).json', 'r', encoding="utf-8") as f:
+        js = json.load(f)
+    print(js.keys())
+    rs = requests.post(url, json.dumps(js), headers={"Content-Type": "application/json"})
+    base64_file = json.loads(rs.content)["content"]
+    print(rs.content)
+    #with open('Test2.docx', 'wb') as f:
+    #    f.write(base64_file)
+    #print("-----------------------------------------------",base64_file.keys())
+    file_content=base64.b64decode(base64_file)
+    file_content=io.BytesIO(file_content)
+    file_content.seek(0)
+    with open('Test.docx', 'wb') as f:
+        f.write(file_content.read())
+test_Word_functions()
