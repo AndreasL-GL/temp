@@ -10,13 +10,22 @@ services:
     ports:
     - 5000:5000
   nginx:
-    build: ./services/nginx
-    environment:
-      - VIRTUAL_HOST=your_domain
-      - LETSENCRYPT_HOST=your_domain
+    image: nginx:latest
+   # environment:
+  #    - VIRTUAL_HOST=your_domain
+    #  - LETSENCRYPT_HOST=your_domain
     ports:
       - 80:80
       - 443:443
     depends_on:
       - api
     restart: always
+    volumes:
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
