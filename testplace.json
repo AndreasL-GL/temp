@@ -1,0 +1,78 @@
+{
+    "__metadata": {
+        "id": "https://greenlandscapingmalmo.sharepoint.com/sites/GLMalmAB-EgenkontrollerGPISSVeloa/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun Lekplatser Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg')",
+        "uri": "https://greenlandscapingmalmo.sharepoint.com/sites/GLMalmAB-EgenkontrollerGPISSVeloa/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun%20Lekplatser%20Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg')",
+        "type": "SP.File"
+    },
+    "Author": {
+        "__deferred": {
+            "uri": "https://greenlandscapingmalmo.sharepoint.com/sites/GLMalmAB-EgenkontrollerGPISSVeloa/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun%20Lekplatser%20Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg')/Author"
+        }
+    },
+    "CheckedOutByUser": {
+        "__deferred": {
+            "uri": "https://greenlandscapingmalmo.sharepoint.com/sites/GLMalmAB-EgenkontrollerGPISSVeloa/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun%20Lekplatser%20Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg')/CheckedOutByUser"
+        }
+    },
+    "EffectiveInformationRightsManagementSettings": {
+        "__deferred": {
+            "uri": "https://greenlandscapingmalmo.sharepoint.com/sites/GLMalmAB-EgenkontrollerGPISSVeloa/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun%20Lekplatser%20Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg')/EffectiveInformationRightsManagementSettings"
+        }
+    },
+    "InformationRightsManagementSettings": {
+        "__deferred": {
+            "uri": "https://greenlandscapingmalmo.sharepoint.com/sites/GLMalmAB-EgenkontrollerGPISSVeloa/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun%20Lekplatser%20Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg')/InformationRightsManagementSettings"
+        }
+    },
+    "ListItemAllFields": {
+        "__deferred": {
+            "uri": "https://greenlandscapingmalmo.sharepoint.com/sites/GLMalmAB-EgenkontrollerGPISSVeloa/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun%20Lekplatser%20Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg')/ListItemAllFields"
+        }
+    },
+    "LockedByUser": {
+        "__deferred": {
+            "uri": "https://greenlandscapingmalmo.sharepoint.com/sites/GLMalmAB-EgenkontrollerGPISSVeloa/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun%20Lekplatser%20Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg')/LockedByUser"
+        }
+    },
+    "ModifiedBy": {
+        "__deferred": {
+            "uri": "https://greenlandscapingmalmo.sharepoint.com/sites/GLMalmAB-EgenkontrollerGPISSVeloa/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun%20Lekplatser%20Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg')/ModifiedBy"
+        }
+    },
+    "Properties": {
+        "__deferred": {
+            "uri": "https://greenlandscapingmalmo.sharepoint.com/sites/GLMalmAB-EgenkontrollerGPISSVeloa/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun%20Lekplatser%20Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg')/Properties"
+        }
+    },
+    "VersionEvents": {
+        "__deferred": {
+            "uri": "https://greenlandscapingmalmo.sharepoint.com/sites/GLMalmAB-EgenkontrollerGPISSVeloa/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun%20Lekplatser%20Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg')/VersionEvents"
+        }
+    },
+    "Versions": {
+        "__deferred": {
+            "uri": "https://greenlandscapingmalmo.sharepoint.com/sites/GLMalmAB-EgenkontrollerGPISSVeloa/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun%20Lekplatser%20Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg')/Versions"
+        }
+    },
+    "CheckInComment": "",
+    "CheckOutType": 2,
+    "ContentTag": "{94C64E54-EC19-4F89-A549-961B47CD2491},1,2",
+    "CustomizedPageStatus": 0,
+    "ETag": "\"{94C64E54-EC19-4F89-A549-961B47CD2491},1\"",
+    "Exists": true,
+    "IrmEnabled": false,
+    "Length": "352479",
+    "Level": 1,
+    "LinkingUri": null,
+    "LinkingUrl": "",
+    "MajorVersion": 1,
+    "MinorVersion": 0,
+    "Name": "2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg",
+    "ServerRelativeUrl": "/sites/GLMalmAB-EgenkontrollerGPISSVeloa/Lists/Kommun Lekplatser Egenkontroll/Attachments/30/2eaab0ab-49a4-4f80-bff5-38f5e0ea6d27.jpg",
+    "TimeCreated": "2023-04-17T05:00:15Z",
+    "TimeLastModified": "2023-04-17T05:00:15Z",
+    "Title": null,
+    "UIVersion": 512,
+    "UIVersionLabel": "1.0",
+    "UniqueId": "94c64e54-ec19-4f89-a549-961b47cd2491"
+}

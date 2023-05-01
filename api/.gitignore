@@ -227,11 +227,12 @@ cython_debug/
 # SageMath parsed files
 
 # Environments
-
+*.json
 # Spyder project settings
 
 # Rope project settings
-
+api/functions/Sharepoint/get_all_attachments_and_items/
+        testplace.json
 # mkdocs documentation
 
 # mypy

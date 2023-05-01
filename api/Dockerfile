@@ -8,4 +8,5 @@ RUN pip install -r requirements.txt
 # Install OpenJDK-8
 RUN apt update
 RUN apt install default-jdk -y
+ENV PYTHONPATH=/home/app:$PYTHONPATH
 COPY . /home/app/

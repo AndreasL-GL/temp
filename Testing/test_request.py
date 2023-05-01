@@ -64,9 +64,6 @@ def test_Word_functions():
         js = json.load(f)
     rs = requests.post(url, json.dumps(js), headers={"Content-Type": "application/json"})
     base64_file = json.loads(rs.content)["content"]
-    #with open('Test2.docx', 'wb') as f:
-    #    f.write(base64_file)
-    #print("-----------------------------------------------",base64_file.keys())
     file_content=base64.b64decode(base64_file)
     file_content=io.BytesIO(file_content)
     file_content.seek(0)
