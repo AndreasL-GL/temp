@@ -99,7 +99,7 @@ def run_functions(js):
     doc.save(file_content)
     file_content.seek(0)
     file_content=base64.b64encode(file_content.getvalue()).decode('utf-8')
-    return {"content":file_content, "filename": title+" Vecka "+js["Vecka"]+'.docx'}
+    return {"content":file_content, "filename": title+" Vecka "+js["Vecka"]}
 
 def download_template_file():
     """Downloads the word template for this program."""
