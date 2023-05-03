@@ -48,7 +48,6 @@ def add_images_to_doc(file,tbl):
     """Adds all the image rows with the accompanying test per the template we used before."""
     doc = docx.Document(file)
     
-    doc.add_page_break()
     doc.add_heading('Bilder och Kommentarer', 0)
     table = doc.add_table(rows=1, cols=3)
     table.style = 'Plain Table 5'
