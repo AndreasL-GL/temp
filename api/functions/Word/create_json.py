@@ -37,7 +37,6 @@ def create_json_for_word_functions(js):
         })
     fID = [{"Bild":decode_file(item['Item']), "ID":item["Item_ID"]} for item in js['Attachments']]
     items_list = []
-    [print(kontroll) for kontroll in kontrollmoment]
     for item in js['Items']['value']:
         items_list.append([{
             "Bild": fIDItem["Bild"],
