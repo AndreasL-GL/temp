@@ -8,7 +8,7 @@ import mailmerge
 from PIL import Image
 import docx
 from docx.shared import Pt, Inches, RGBColor
-from Office_helper_functions.Word.form_field import set_checkbox_value
+from Office_helper_functions.Word.form_field import set_checkbox_value, compress_word_file
 from Office_helper_functions.Image.Image_operations import resize_and_autoorient
 from functions.Word.add_image_to_zipfile import add_icon_to_word_file
 import base64
@@ -401,6 +401,7 @@ def run_functions(js):
     file = io.BytesIO()
     doc.save(file)
     file.seek(0)
+    #file = compress_word_file(file.getvalue())
     return {"content": base64.b64encode(file.getvalue()).decode('utf-8'), "filename": js["Items"]['value'][0]['Besiktningsman']+'.docx'}
 
 
