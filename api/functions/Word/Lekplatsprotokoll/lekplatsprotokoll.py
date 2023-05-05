@@ -391,7 +391,7 @@ def run_functions(js):
     file = io.BytesIO()
     doc.save(file)
     file.seek(0)
-    return {"content": base64.b64encode(file.getvalue()).decode('utf-8'), "filename": "filename.docx"}
+    return {"content": file.getvalue(), "filename": "filename.docx"}
 
 
 if __name__ == '__main__':
