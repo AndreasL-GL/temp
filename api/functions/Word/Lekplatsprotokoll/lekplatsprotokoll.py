@@ -391,7 +391,7 @@ def run_functions(js):
     file = io.BytesIO()
     doc.save(file)
     file.seek(0)
-    return file.getvalue()
+    return {"content": base64.b64encode(file.getvalue()).decode('utf-8'), "filename": js["Items"]['value'][0]['Besiktningsman']+'.docx'}
 
 
 if __name__ == '__main__':
@@ -408,13 +408,4 @@ if __name__ == '__main__':
     # url = "https://greenlandscapingmalmo.sharepoint.com/sites/Funktionskontrolllekplatsdemo/_api/web/GetFileByServerRelativeUrl('/sites/Funktionskontrolllekplatsdemo/Lists/Lista_lekplats_besiktningsprotokoll/Attachments/2171/4929E5D2-6190-495A-AF7F-2523EC1D5AA9.jpg')/$value"
     # img = requests.get(url, get_sharepoint_access_headers_through_client_id())
     
-
-    
-    
     ### TODO:
-    """
-    Kontrollera att Besiktningsmannens telefonnummer verkligen är "Telefonnummer" i js1. Annars ändra i alla templates.
-    Fortsätt med att skriva in värden för brunnar anmärkningar osv osv. enligt flödet.
-    
-    
-    """
