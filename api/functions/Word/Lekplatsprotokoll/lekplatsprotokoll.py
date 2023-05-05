@@ -401,8 +401,9 @@ def run_functions(js):
     file = io.BytesIO()
     doc.save(file)
     file.seek(0)
+    js1 = [js['Items']['value'][0]]
     #file = compress_word_file(file.getvalue())
-    return {"content": base64.b64encode(file.getvalue()).decode('utf-8'), "filename": js["Items"]['value'][0]['Besiktningsman']+'.docx'}
+    return {"content": base64.b64encode(file.getvalue()).decode('utf-8'), "filename": js1['ID']+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum']}
 
 
 if __name__ == '__main__':
