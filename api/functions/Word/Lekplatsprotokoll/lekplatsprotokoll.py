@@ -13,7 +13,7 @@ from Office_helper_functions.Image.Image_operations import resize_and_autoorient
 from functions.Word.add_image_to_zipfile import add_icon_to_word_file
 import base64
 from docx.enum.text import WD_BREAK
-
+from flask import abort
 
 icons = {
          "Green Landscaping AB":"https://greenlandscapingmalmo.sharepoint.com/sites/Funktionskontrolllekplatsdemo/_api/web/GetFileByServerRelativeUrl('/sites/Funktionskontrolllekplatsdemo/Delade Dokument/Protokoll lekplats besiktning demo/Template/Loggor/GLAB_png.png')/$value",
@@ -41,12 +41,10 @@ def create_protocol(site, lista, js):
     
     js1 = js["Items"]['value'][0]
 
-    
-    if js1["Telefonnummer"] == 0 or js1["Telefonnummer"] == "0":
-        return {"status":"failed"}
+    if "Telefonnummer" not in js1.keys(): js["Telefonnummer"] = ''
+
     js1['Hemsida'] = certifikatjs['Hemsida']
     js1['Email'] = js1['Author']['Email']
-    js1['Telefonnummer'] = certifikatjs['Telefonnummer']
     js1['Dagensdatum'] = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d")
     js1['Bolag'] = certifikatjs['Bolag']['Value']
     js1["Certifieringstext2"] = """Klagomål
@@ -76,7 +74,7 @@ def populate_template(js1, certifikatjs, js, trigger):
     if trigger['DigitalsignaturLekplats'] or trigger['DigitalsignaturUtegym']:
         js1['Digital signatur'] = "Härmed intygas att besiktningen utförts enligt gällande regler."
         js1['Digital signatur 2'] = "Digitalt signerad av",js1['Author']['DisplayName']+',', js1['Created'].split('T')[0]
-
+    if "Telefonnummer" not in certifikatjs.keys(): abort(400, message="Inget telefonnummer för besiktningsman.")
     js1["Besmantelefonnummer"] = certifikatjs["Telefonnummer"]
     js1["Adresstillprotokoll"] = certifikatjs['Adresstillprotokoll']
     js1['Created'] = js1['Created'].split('T')[0]
