@@ -2,7 +2,7 @@ import io
 import zipfile
 import zlib
 from PIL import Image
-def add_icon_to_word_file(word_file, icon_file):
+def add_icon_to_word_file(word_file, icon_file, imagepath):
     """Adds an icon to a word file by first unzipping it, replacing an icon png file with a bytes object. returns a compressed BytesIO. No further processing is necessary to use as a document.
 
     Args:
@@ -15,7 +15,7 @@ def add_icon_to_word_file(word_file, icon_file):
     with zipfile.ZipFile(io.BytesIO(word_file), mode='r') as zf:
 
         files = {x: zf.read(x) for x in zf.namelist()}
-        files['word/media/image2.png'] = icon_file
+        files[imagepath] = icon_file
 
     # Create a new in-memory ZipFile object
     new_word_file = io.BytesIO()

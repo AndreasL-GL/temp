@@ -6,6 +6,7 @@ import base64
 import io
 import json
 
+
 if __name__ == '__main__':
     import get_template
     from add_image_to_zipfile import add_icon_to_word_file, autoorient
@@ -80,7 +81,7 @@ def change_icon_in_header(doc):
     docbyte = io.BytesIO()
     doc.save(docbyte)
     docbyte.seek(0)
-    doc = add_icon_to_word_file(docbyte.read(), icon_file=fb.read())
+    doc = add_icon_to_word_file(docbyte.read(), icon_file=fb.read(), imagepath="word/media/image2.png")
     doc = docx.Document(doc)
     return doc
 

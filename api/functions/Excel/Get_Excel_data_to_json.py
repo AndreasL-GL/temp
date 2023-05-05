@@ -667,7 +667,7 @@ if __name__ == '__main__':
         wb.save(file)
         file.seek(0)
         file = fix_excel_file(file.read())
-        wb=openpyxl.load_workbook(io.BytesIO(file))
+        wb=openpyxl.load_workbook(file)
         wb.save(os.path.join(os.path.dirname(__file__),'001.xlsx'))
         wb.close()
         

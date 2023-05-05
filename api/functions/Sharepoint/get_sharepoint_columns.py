@@ -54,7 +54,14 @@ def get_fields(site, list_):
     js = get_body_from_sharepoint_api(js)
     return js
 
-
+def get_by_url(url):
+    headers = get_sharepoint_access_headers_through_client_id()
+    l = requests.get(url)
+    js = json.loads(l.text)
+    return js
+    
+    
+    
 def get_sites():
     headers = get_sharepoint_access_headers_through_client_id()
     url = "https://greenlandscapingmalmo.sharepoint.com/_api/search/query?querytext=%27contentClass:STS_Site%27&trimduplicates=false&selectproperties=%27SiteLogo%2cTitle%27"
