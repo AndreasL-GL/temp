@@ -18,4 +18,4 @@ def protokoll():
     json_content = request.get_json()
     print(json_content.keys())
     json_content = lekplatsprotokoll.run_functions(json_content)
-    return jsonify(json_content)
+    return json_content
