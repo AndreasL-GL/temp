@@ -160,7 +160,7 @@ def populate_template(js1, certifikatjs, js, trigger):
     bighead = doc.styles.add_style('Big heading', st)
     bighead.font.size = Pt(22)
     bighead.font.color.rgb = RGBColor(100,200,100)
-
+    print(str(js1['ID'])+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum'])
     doc.add_page_break()
     add_översiktsbild(doc,js)
     add_utrustning(doc,js)
@@ -403,7 +403,7 @@ def run_functions(js):
     file.seek(0)
     js1 = [js['Items']['value'][0]]
     #file = compress_word_file(file.getvalue())
-    return {"content": base64.b64encode(file.getvalue()).decode('utf-8'), "filename": js1['ID']+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum']}
+    return {"content": base64.b64encode(file.getvalue()).decode('utf-8'), "filename": str(js1['ID'])+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum']}
 
 
 if __name__ == '__main__':
