@@ -40,8 +40,14 @@ def create_protocol(site, lista, js):
     trigger = js['Trigger']
     
     js1 = js["Items"]['value'][0]
-
-    if "Telefonnummer" not in js1.keys(): js["Telefonnummer"] = ''
+    print(js1.keys())
+    js1['Informationsskylt'] = ['Finns' if js1['Informationsskylt'] else 'Saknas på ett eller flera redskap'][0]
+    js1['Anv_x00e4_ndarinformation'] = ['Finns' if js1['Anv_x00e4_ndarinformation'] else 'Saknas på ett eller flera redskap'][0]
+    js1['M_x00e4_rkningavredskap_x002f_ty'] = ['Finns' if js1['M_x00e4_rkningavredskap_x002f_ty'] else 'Saknas på ett eller flera redskap'][0]
+    js1['I_bed'] = ['-' if js1['Informationsskylt']=='Finns' else 'C'][0]
+    js1['A_bed'] = ['-' if js1['Anv_x00e4_ndarinformation']=='Finns' else 'C'][0]
+    js1['M_bed'] = ['-' if js1['M_x00e4_rkningavredskap_x002f_ty']=='Finns' else 'C'][0]
+    if "Telefonnummer" not in js1.keys(): js1["Telefonnummer"] = ''
 
     js1['Hemsida'] = certifikatjs['Hemsida']
     js1['Email'] = js1['Author']['Email']
@@ -69,7 +75,7 @@ Samt av fitnessutrustning
     
 def populate_template(js1, certifikatjs, js, trigger):
     trigger['DigitalsignaturLekplats'] = False
-    
+
     
     if trigger['DigitalsignaturLekplats'] or trigger['DigitalsignaturUtegym']:
         js1['Digital signatur'] = "Härmed intygas att besiktningen utförts enligt gällande regler."
@@ -117,7 +123,6 @@ def populate_template(js1, certifikatjs, js, trigger):
     
     
     if not js1["Fitnessbesiktning"]:
-        print(js1['Fysiskomfattning']['Value'])
     
         match js1["Fysiskomfattning"]['Value']:
             case "Endast lekredskap":
@@ -184,7 +189,6 @@ def add_översiktsbild(doc,js):
         row[0].add_paragraph().add_run().add_picture(img)
     return None
 def add_utrustning(doc,js):
-    print(js["Utrustning"][0]['Items'].keys())
     # Add the table for the Utrustnings items:
     h = doc.add_heading('Produktbeskrivning')
     h.style = 'Big heading'
@@ -196,6 +200,9 @@ def add_utrustning(doc,js):
     small.font.italic = True
     vsmall= doc.styles.add_style('vsmall', h.style.type)
     vsmall.font.size = Pt(8)
+    bold = doc.styles.add_style('bold', h.style.type)
+    bold.font.size = Pt(10)
+    bold.font.bold = True
     # h.style.font.color.rgb = RGBColor(100,200,100)
     table = doc.add_table(rows=1, cols=5)
     table.style = 'Grid Table 1 Light'
@@ -211,7 +218,9 @@ def add_utrustning(doc,js):
         row = table.add_row().cells
         row[0].text = str(i+1)
         row[0].width = Inches(0.2)
-        row[1].text = item['Items']['Utrustning']['Value']
+        
+        if "Utegymredskap" in item['Items'].keys() and "Utrustning" not in item['Items'].keys(): row[1].text = item['Items']['Utegymredskap']['Value']
+        else : row[1].text = item['Items']['Utrustning']['Value']
         row[2].text = item['Items']['Tillverkare_x002f_artnr']
         row[3].text = item['Items']['OData__x00c5_rtal']
         row[4].text = "Bild: "+str(i+1)
@@ -251,6 +260,10 @@ def add_underlag(doc,js):
     #images = [img['Image'][0] for img in js['Anmärkningar']]
     
     for i, item in enumerate(js['Underlag']):
+        p = doc.add_paragraph()
+        print(js['Utrustning'][0].keys())
+        p.text = 'Produkt '+str([i+1 for i, utr in enumerate(js['Utrustning']) if utr['Items']['ID'] == item['UtrustningsID']][0])+':' + item['Utrustning']
+        p.style = 'bold'
         table = doc.add_table(rows=1, cols=2)
         table.style = 'Grid Table Light'
         row = table.rows[0].cells
@@ -273,7 +286,7 @@ def add_anmärkningar(doc, js):
     hh.style = 'Big heading'
     #images = [img['Image'][0] for img in js['Anmärkningar']]
     for i, item in enumerate(js['Anmärkningar']):
-        h = doc.add_heading('Produkt '+str(i+1)+', '+ item['Items']['Utrustningstyp0'], 0)
+        h = doc.add_heading('Produkt '+str(i+1)+', '+ [item['Items']['Utrustningstyp0'] if 'Utrustningstyp0' in item['Items'].keys() else 'Gymredskap'][0], 0)
         h.style= 'subheading'
         if item['Items']['{HasAttachments}']:
             if item['Image'][0]['content']:
@@ -384,7 +397,6 @@ def add_page_break(document):
         p.add_run().add_break(WD_BREAK.PAGE)
 
 def run_functions(js):
-    print(js.keys())
     doc = create_protocol('Funktionskontrolllekplatsdemo',"Lista_lekplats_besiktningsprotokoll",js)
     file = io.BytesIO()
     doc.save(file)
