@@ -74,9 +74,7 @@ Samt av fitnessutrustning
     
     
 def populate_template(js1, certifikatjs, js, trigger):
-    trigger['DigitalsignaturLekplats'] = False
 
-    
     if trigger['DigitalsignaturLekplats'] or trigger['DigitalsignaturUtegym']:
         js1['Digital signatur'] = "Härmed intygas att besiktningen utförts enligt gällande regler."
         js1['Digital signatur 2'] = "Digitalt signerad av",js1['Author']['DisplayName']+',', js1['Created'].split('T')[0]
