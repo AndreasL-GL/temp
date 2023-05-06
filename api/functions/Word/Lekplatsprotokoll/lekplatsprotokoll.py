@@ -246,20 +246,66 @@ def add_utrustning(doc,js):
     
     doc.add_heading('Besiktningsresultat', 0).style = 'Big heading'
     
-    table = doc.add_table(rows=1, cols=3)
-    index = 0
+    
+    
     images = [x['Image'][0]['content'] for x in js['Utrustning']]
-    while index < len(images):
-        row = table.add_row().cells
-        for i in range(0,3):
+    
+    for item in js['Utrustning']:
+        print(len(item['Image']))
+        print(type(item['Image']))
+    table = doc.add_table(rows=0,cols=3)
+    index1 = 1
+    imagedict = {}
+    for item in js['Utrustning']:
+        for item2 in item['Image']:
+            imagedict[item2['content']] = index1
             
-            file = io.BytesIO(base64.b64decode(js['Utrustning'][index]['Image'][0]['content']))
-            file.seek(0)
-            file = resize_and_autoorient(file,120,120)
-            row[i].add_paragraph().text = "Bild: "+str(index+1)
-            row[i].add_paragraph().add_run().add_picture(file)
-            index +=1
-            if index == len(images):break
+        index1+=1
+    index0 = 0
+    row = table.add_row().cells
+    for img, index in imagedict.items():
+        pt = row[index0].add_paragraph()
+        pt.text = 'Bild: ' + str(index)
+        file = io.BytesIO(base64.b64decode(img))
+        file.seek(0)
+        file = resize_and_autoorient(file,120,120)
+        p = row[index0].add_paragraph()
+        p.add_run().add_picture(file)
+        index0 +=1
+        if index0 ==3:
+            row = table.add_row().cells
+            index0 = 0
+        
+        
+    # while index1 < len(js['Utrustning']):
+    #     index = 0
+    #     while index < len(js['Utrustning'][index1]['Image']):
+    #         row = table.add_row().cells
+    #         for i in range(0,3):
+    #             if index1 == len(js['Utrustning']):break
+    #             if index == len(js['Utrustning'][index1]['Image']): continue
+    #             p= row[i].add_paragraph()
+    #             p.text = 'Bild: '+str(index1+1)
+    #             file = io.BytesIO(base64.b64decode(item['Image'][index]['content']))
+    #             file.seek(0)
+    #             file = resize_and_autoorient(file,120,120)
+    #             row[i].add_paragraph().add_run().add_picture(file)
+    #             index+=1
+    #             index1+=1
+            
+    # index = 0
+    # table = doc.add_table(rows=1, cols=3)
+    # while index < len(images):
+    #     row = table.add_row().cells
+    #     for i in range(0,3):
+            
+    #         file = io.BytesIO(base64.b64decode(js['Utrustning'][index]['Image'][0]['content']))
+    #         file.seek(0)
+    #         file = resize_and_autoorient(file,120,120)
+    #         row[i].add_paragraph().text = "Bild: "+str(index+1)
+    #         row[i].add_paragraph().add_run().add_picture(file)
+    #         index +=1
+    #         if index == len(images):break
     return None
 
 def add_underlag(doc,js):
@@ -302,14 +348,24 @@ def add_anmärkningar(doc, js):
         h.style= 'subheading'
         h.paragraph_format.keep_with_next = True
         if item['Items']['{HasAttachments}']:
-            if item['Image'][0]['content']:
-                img = item['Image'][0]['content']
-                file = io.BytesIO(base64.b64decode(img))
-                file.seek(0)
-                img = resize_and_autoorient(file, 80,80)
-                p = doc.add_paragraph()
-                p.paragraph_format.keep_with_next=True
-                p.add_run().add_picture(img)
+            table = doc.add_table(rows=0, cols=4)
+            index = 0
+            table.style.paragraph_format.keep_together = True
+            while index < len(item['Image']):
+                row0 = table.add_row()
+                row =row0.cells
+                for i in range(0,4):
+                    if index == len(item['Image']): continue
+                    row[i]
+                    file = io.BytesIO(base64.b64decode(item['Image'][index]['content']))
+                    file.seek(0)
+                    file = resize_and_autoorient(file,100,100)
+                    p=row[i].add_paragraph()
+                    p.paragraph_format.keep_with_next=True
+                    run = p.add_run()
+                    picture = run.add_picture(file)
+                    index +=1
+                    
         
         table = doc.add_table(rows=1, cols=2)
         table.style = 'Grid Table Light'
@@ -359,14 +415,32 @@ def add_grindar(doc, js):
     for i, item in enumerate(js['Staket']):
         
         if item['Items']['{HasAttachments}']:
-            if item['Images'][0]['content']:
-                img = item['Images'][0]['content']
-                file = io.BytesIO(base64.b64decode(img))
-                file.seek(0)
-                img = resize_and_autoorient(file, 80,80)
-                p = doc.add_paragraph()
-                p.paragraph_format.keep_with_next = True
-                p.add_run().add_picture(img)
+            table = doc.add_table(rows=0, cols=4)
+            index = 0
+            table.style.paragraph_format.keep_with_next = True
+            while index < len(item['Images']):
+                row = table.add_row().cells
+                for i in range(0,4):
+                    if index == len(item['Images']): continue
+                    row[i]
+                    file = io.BytesIO(base64.b64decode(item['Images'][index]['content']))
+                    file.seek(0)
+                    file = resize_and_autoorient(file,100,100)
+                    p=row[i].add_paragraph()
+                    picture = p.add_run().add_picture(file)
+
+                    index +=1
+                    
+
+                
+            # if item['Images'][0]['content']:
+            #     img = item['Images'][0]['content']
+            #     file = io.BytesIO(base64.b64decode(img))
+            #     file.seek(0)
+            #     img = resize_and_autoorient(file, 80,80)
+            #     p = doc.add_paragraph()
+            #     p.paragraph_format.keep_with_next = True
+            #     p.add_run().add_picture(img)
                 
                 
         table = doc.add_table(rows=1, cols=2)
@@ -392,14 +466,22 @@ def add_brunnar(doc,js):
     #images = [img['Image'][0] for img in js['Anmärkningar']]
     for i, item in enumerate(js['Brunnar']):
         if item['Items']['{HasAttachments}']:
-            if item['Image'][0]['content']:
-                img = item['Image'][0]['content']
-                file = io.BytesIO(base64.b64decode())
-                file.seek(0)
-                img = resize_and_autoorient(file, 80,80)
-                p = doc.add_paragraph()
-                p.paragraph_format.keep_with_next = True
-                p.add_run().add_picture(img)
+            table = doc.add_table(rows=0, cols=4)
+            index = 0
+            table.style.paragraph_format.keep_with_next = True
+            while index < len(item['Image']):
+                row = table.add_row().cells
+                for i in range(0,4):
+                    if index == len(item['Image']): continue
+                    row[i]
+                    file = io.BytesIO(base64.b64decode(item['Image'][index]['content']))
+                    file.seek(0)
+                    file = resize_and_autoorient(file,100,100)
+                    p=row[i].add_paragraph()
+                    picture = p.add_run().add_picture(file)
+
+                    index +=1
+                    
                 
         table = doc.add_table(rows=1, cols=2)
         table.style = 'Grid Table Light'
