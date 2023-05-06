@@ -133,5 +133,4 @@ if __name__ == '__main__':
     headers=get_sharepoint_access_headers_through_client_id()
     url = "https://greenlandscapingmalmo.sharepoint.com/_api/search/query?querytext=%27contentclass:STS_SitePath:%22https://greenlandscapingmalmo.sharepoint.com/*%22%27&rowlimit=500"
     l = requests.get(url, headers=headers)
-    print(l.content)
     

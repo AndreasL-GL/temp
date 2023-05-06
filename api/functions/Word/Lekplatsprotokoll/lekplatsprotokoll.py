@@ -160,7 +160,6 @@ def populate_template(js1, certifikatjs, js, trigger):
     bighead = doc.styles.add_style('Big heading', st)
     bighead.font.size = Pt(22)
     bighead.font.color.rgb = RGBColor(100,200,100)
-    print(str(js1['ID'])+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum'])
     doc.add_page_break()
     add_översiktsbild(doc,js)
     add_utrustning(doc,js)
@@ -172,6 +171,13 @@ def populate_template(js1, certifikatjs, js, trigger):
     if any(js['Staket']):
         add_grindar(doc,js)
     if any(js['Brunnar']):
+        add_brunnar(doc,js)
+    else:
+        js['Brunnar'] = [{'Items':{
+            '{HasAttachments}':False,
+            'Anm_x00e4_rkning':'-',
+            'Status':{'Value':'Ej kontrollerade.'}
+            }, 'Images':''}]
         add_brunnar(doc,js)
     doc.save(os.path.join(os.path.dirname(__file__), 'steg_1.docx'), )
     return doc
@@ -265,7 +271,6 @@ def add_underlag(doc,js):
     
     for i, item in enumerate(js['Underlag']):
         p = doc.add_paragraph()
-        print(js['Utrustning'][0].keys())
         p.text = 'Produkt '+str([i+1 for i, utr in enumerate(js['Utrustning']) if utr['Items']['ID'] == item['UtrustningsID']][0])+':' + item['Utrustning']
         p.style = 'bold'
         p.paragraph_format.keep_with_next = True
@@ -451,7 +456,6 @@ def add_page_break(doc):
 
         space_after = paragraph.paragraph_format.space_after
         space_after = space_after.pt if space_after is not None else 0
-        print(space_after,space_before)
         font_size = paragraph.runs[0].font.size.pt if paragraph.runs and paragraph.runs[0].font.size else 0
 
         line_spacing = paragraph.paragraph_format.line_spacing
@@ -460,12 +464,10 @@ def add_page_break(doc):
         content_height += paragraph_height
         section = doc.sections[0]
         page_height = section.page_height
-        print(content_height,page_height,top_margin,bottom_margin)
 
     # Estimate the remaining space on the page
     remaining_space = page_height - top_margin - bottom_margin - content_height
 
-    print(f"The remaining space on the page is approximately {remaining_space} points.")
 
 def run_functions(js):
     doc = create_protocol('Funktionskontrolllekplatsdemo',"Lista_lekplats_besiktningsprotokoll",js)
