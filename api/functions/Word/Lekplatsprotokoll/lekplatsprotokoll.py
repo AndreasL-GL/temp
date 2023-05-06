@@ -84,6 +84,7 @@ def populate_template(js1, certifikatjs, js, trigger):
     js1["Besmantelefonnummer"] = certifikatjs["Telefonnummer"]
     js1["Adresstillprotokoll"] = certifikatjs['Adresstillprotokoll']
     js1['Created'] = js1['Created'].split('T')[0]
+    js1['Certnr'] = certifikatjs['Certnr']
     if not trigger['DigitalsignaturUtegym'] and js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Fitness mall ej cert.docx'))
     elif trigger['DigitalsignaturUtegym'] and js1['Fitnessbesiktning']:
@@ -248,11 +249,8 @@ def add_utrustning(doc,js):
     
     
     
-    images = [x['Image'][0]['content'] for x in js['Utrustning']]
     
-    for item in js['Utrustning']:
-        print(len(item['Image']))
-        print(type(item['Image']))
+
     table = doc.add_table(rows=0,cols=3)
     index1 = 1
     imagedict = {}
