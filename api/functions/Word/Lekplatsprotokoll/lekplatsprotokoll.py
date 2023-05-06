@@ -182,10 +182,11 @@ def add_översiktsbild(doc,js):
         image.seek(0)
         h=doc.add_heading('Översiktsbild av lekplatsen', 0)
         h.style = 'Big heading'
-        img = resize_and_autoorient(image,300,350)
+        img = resize_and_autoorient(image,300,320)
         table = doc.add_table(rows=1,cols=1)
         row = table.add_row().cells
         row[0].add_paragraph().add_run().add_picture(img)
+        add_page_break(doc)
     return None
 def add_utrustning(doc,js):
     # Add the table for the Utrustnings items:
