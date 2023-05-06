@@ -74,10 +74,11 @@ Samt av fitnessutrustning
     
     
 def populate_template(js1, certifikatjs, js, trigger):
-
     if trigger['DigitalsignaturLekplats'] or trigger['DigitalsignaturUtegym']:
         js1['Digital signatur'] = "Härmed intygas att besiktningen utförts enligt gällande regler."
-        js1['Digital signatur 2'] = "Digitalt signerad av",js1['Author']['DisplayName']+',', js1['Created'].split('T')[0]
+        js1['Digital signatur 2'] = "Digitalt signerad av "+js1['Author']['DisplayName']+', '+ js1['Created'].split('T')[0]
+    js1['digsign'] = js1['Digital signatur']
+    js1['digsign2'] = js1['Digital signatur 2']
     if "Telefonnummer" not in certifikatjs.keys(): abort(400, message="Inget telefonnummer för besiktningsman.")
     js1["Besmantelefonnummer"] = certifikatjs["Telefonnummer"]
     js1["Adresstillprotokoll"] = certifikatjs['Adresstillprotokoll']
@@ -89,6 +90,7 @@ def populate_template(js1, certifikatjs, js, trigger):
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Fitness mall cert.docx'))
     elif trigger['DigitalsignaturLekplats'] and not js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Lekplatsbesiktning mall cert.docx'))
+        print("Hello")
     elif not trigger['DigitalsignaturLekplats'] and not js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Lekplatsbesiktning mall ej cert.docx'))
         
