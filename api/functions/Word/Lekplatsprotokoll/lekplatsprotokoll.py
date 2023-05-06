@@ -164,6 +164,7 @@ def populate_template(js1, certifikatjs, js, trigger):
     doc.add_page_break()
     add_översiktsbild(doc,js)
     add_utrustning(doc,js)
+    if len(js['Utrustning']) >7 and len(js['Utrustning']) <= 12: doc.add_page_break()
     # add_page_break(doc)
     add_anmärkningar(doc,js)
     # add_page_break(doc)
@@ -260,14 +261,17 @@ def add_underlag(doc,js):
     hh = doc.add_heading('Stötdämpande underlag:', 0)
     hh.style = 'Big heading'
     #images = [img['Image'][0] for img in js['Anmärkningar']]
+    hh.paragraph_format.keep_with_next=True
     
     for i, item in enumerate(js['Underlag']):
         p = doc.add_paragraph()
         print(js['Utrustning'][0].keys())
         p.text = 'Produkt '+str([i+1 for i, utr in enumerate(js['Utrustning']) if utr['Items']['ID'] == item['UtrustningsID']][0])+':' + item['Utrustning']
         p.style = 'bold'
+        p.paragraph_format.keep_with_next = True
         table = doc.add_table(rows=1, cols=2)
         table.style = 'Grid Table Light'
+        table.style.paragraph_format.keep_with_next = True
         row = table.rows[0].cells
         row[0].text = item['Kommentar']
         row[0].style = 'vsmall'
@@ -286,35 +290,67 @@ def add_anmärkningar(doc, js):
     doc.add_paragraph()
     hh = doc.add_heading('Anmärkningar:', 0)
     hh.style = 'Big heading'
+    hh.style.paragraph_format.keep_with_next = True
     #images = [img['Image'][0] for img in js['Anmärkningar']]
     for i, item in enumerate(js['Anmärkningar']):
         h = doc.add_heading('Produkt '+str(i+1)+', '+ [item['Items']['Utrustningstyp0'] if 'Utrustningstyp0' in item['Items'].keys() else 'Gymredskap'][0], 0)
         h.style= 'subheading'
+        h.paragraph_format.keep_with_next = True
         if item['Items']['{HasAttachments}']:
             if item['Image'][0]['content']:
                 img = item['Image'][0]['content']
                 file = io.BytesIO(base64.b64decode(img))
                 file.seek(0)
                 img = resize_and_autoorient(file, 80,80)
-                doc.add_paragraph().add_run().add_picture(img)
+                p = doc.add_paragraph()
+                p.paragraph_format.keep_with_next=True
+                p.add_run().add_picture(img)
+        
         table = doc.add_table(rows=1, cols=2)
         table.style = 'Grid Table Light'
+        table.style.paragraph_format.keep_with_next = True
         row = table.rows[0].cells
         row[0].text = item['Items']['Kommentar']
         row[1].text = item['Items']['Bed_x00f6_mning']['Value']
-        p = doc.add_paragraph()
-        p.text = item['Items']['Utrustningstyp']['Value']
-        p.style = 'small'
         for cell in table.columns[0].cells:
             cell.width = Inches(6)
         for cell in table.columns[1].cells:
             cell.width = Inches(0.4)
+        
+        p1 = doc.add_paragraph()
+        p1.text = item['Items']['Utrustningstyp']['Value']
+        p1.style = 'small'
+        # row0 = table.rows[0].cells
+        # h = doc.add_heading('Produkt '+str(i+1)+', '+ [item['Items']['Utrustningstyp0'] if 'Utrustningstyp0' in item['Items'].keys() else 'Gymredskap'][0], 0)
+        # h.style= 'subheading'
+        # if item['Items']['{HasAttachments}']:
+        #     if item['Image'][0]['content']:
+        #         img = item['Image'][0]['content']
+        #         file = io.BytesIO(base64.b64decode(img))
+        #         file.seek(0)
+        #         img = resize_and_autoorient(file, 80,80)
+        #         p = doc.add_paragraph()
+        #         p.add_run().add_picture(img)
+        # table = doc.add_table(rows=1, cols=2)
+        # table.style = 'Grid Table Light'
+        # row = table.rows[0].cells
+        # row[0].text = item['Items']['Kommentar']
+        # row[1].text = item['Items']['Bed_x00f6_mning']['Value']
+        # for cell in table.columns[0].cells:
+        #     cell.width = Inches(6)
+        # for cell in table.columns[1].cells:
+        #     cell.width = Inches(0.4)
+        # p1 = doc.add_paragraph()
+        # p1.text = item['Items']['Utrustningstyp']['Value']
+        # p1.style = 'small'
+
     return None
 
 def add_grindar(doc, js):
     doc.add_paragraph()
     hh = doc.add_heading('Grindar och staket', 0)
     hh.style = 'Big heading'
+    hh.paragraph_format.keep_with_next=True
     for i, item in enumerate(js['Staket']):
         
         if item['Items']['{HasAttachments}']:
@@ -323,9 +359,14 @@ def add_grindar(doc, js):
                 file = io.BytesIO(base64.b64decode(img))
                 file.seek(0)
                 img = resize_and_autoorient(file, 80,80)
-                doc.add_paragraph().add_run().add_picture(img)
+                p = doc.add_paragraph()
+                p.paragraph_format.keep_with_next = True
+                p.add_run().add_picture(img)
+                
+                
         table = doc.add_table(rows=1, cols=2)
         table.style = 'Grid Table Light'
+        table.style.paragraph_format.keep_with_next=True
         row = table.rows[0].cells
         row[0].text = item['Items']['Kommentar']
         row[1].text = item['Items']['Bed_x00f6_mning']['Value']
@@ -342,6 +383,7 @@ def add_brunnar(doc,js):
     doc.add_paragraph()
     hh = doc.add_heading('Brunnar:', 0)
     hh.style = 'Big heading'
+    hh.paragraph_format.keep_with_next=True
     #images = [img['Image'][0] for img in js['Anmärkningar']]
     for i, item in enumerate(js['Brunnar']):
         if item['Items']['{HasAttachments}']:
@@ -350,9 +392,13 @@ def add_brunnar(doc,js):
                 file = io.BytesIO(base64.b64decode())
                 file.seek(0)
                 img = resize_and_autoorient(file, 80,80)
-                doc.add_paragraph().add_run().add_picture(img)
+                p = doc.add_paragraph()
+                p.paragraph_format.keep_with_next = True
+                p.add_run().add_picture(img)
+                
         table = doc.add_table(rows=1, cols=2)
         table.style = 'Grid Table Light'
+        table.style.paragraph_format.keep_with_next=True
         row = table.rows[0].cells
         row[1].text = item['Items']['Anm_x00e4_rkning']
         row[0].text = item['Items']['Status']['Value']
