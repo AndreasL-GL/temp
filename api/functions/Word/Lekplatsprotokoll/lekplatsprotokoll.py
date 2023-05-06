@@ -87,11 +87,10 @@ def populate_template(js1, certifikatjs, js, trigger):
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Fitness mall ej cert.docx'))
     elif trigger['DigitalsignaturUtegym'] and js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Fitness mall cert.docx'))
-    elif not trigger['DigitalsignaturLekplats'] and not js1['Fitnessbesiktning']:
+    elif trigger['DigitalsignaturLekplats'] and not js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Lekplatsbesiktning mall cert.docx'))
-    elif trigger['DigitalsignaturUtegym'] and not js1['Fitnessbesiktning']:
+    elif not trigger['DigitalsignaturLekplats'] and not js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Lekplatsbesiktning mall ej cert.docx'))
-    
         
  
 
