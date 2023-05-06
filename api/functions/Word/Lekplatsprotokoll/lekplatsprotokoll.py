@@ -40,7 +40,7 @@ def create_protocol(site, lista, js):
     trigger = js['Trigger']
     
     js1 = js["Items"]['value'][0]
-    print(js1.keys())
+
     js1['Informationsskylt'] = ['Finns' if js1['Informationsskylt'] else 'Saknas på ett eller flera redskap'][0]
     js1['Anv_x00e4_ndarinformation'] = ['Finns' if js1['Anv_x00e4_ndarinformation'] else 'Saknas på ett eller flera redskap'][0]
     js1['M_x00e4_rkningavredskap_x002f_ty'] = ['Finns' if js1['M_x00e4_rkningavredskap_x002f_ty'] else 'Saknas på ett eller flera redskap'][0]
@@ -161,12 +161,11 @@ def populate_template(js1, certifikatjs, js, trigger):
     bighead.font.size = Pt(22)
     bighead.font.color.rgb = RGBColor(100,200,100)
     print(str(js1['ID'])+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum'])
-    doc.add_page_break()
     add_översiktsbild(doc,js)
     add_utrustning(doc,js)
-    add_page_break(doc)
+    # add_page_break(doc)
     add_anmärkningar(doc,js)
-    add_page_break(doc)
+    # add_page_break(doc)
     add_underlag(doc,js)
     if any(js['Staket']):
         add_grindar(doc,js)
@@ -235,8 +234,10 @@ def add_utrustning(doc,js):
         cell.width = Inches(0.7)
     for cell in table.columns[4].cells:
         cell.width = Inches(0.8)
-    doc.add_page_break()
+    # doc.add_page_break()
+    doc.add_paragraph()
     doc.add_heading('Besiktningsresultat', 0).style = 'Big heading'
+    
     table = doc.add_table(rows=1, cols=3)
     index = 0
     images = [x['Image'][0]['content'] for x in js['Utrustning']]
@@ -383,18 +384,41 @@ def change_icon_in_header(doc, icon_file, imagepath):
     return doc
 
 
-def add_page_break(document):
-    body_height = document.element.body.get("height", 0)
-    
-    page_height = document.sections[-1].page_height.cm
-    
-    ratio = body_height / page_height
-    
-    if ratio >= 0.5:
-        document.add_page_break()
-    else:
-        p = document.add_paragraph()
-        p.add_run().add_break(WD_BREAK.PAGE)
+def add_page_break(doc):
+
+    # Get the page properties
+    section = doc.sections[0]
+    page_height = section.page_height
+    page_width = section.page_width
+    top_margin = section.top_margin
+    bottom_margin = section.bottom_margin
+    left_margin = section.left_margin
+    right_margin = section.right_margin
+
+    # Get the height of the content in the document
+    content_height = 0
+    for paragraph in doc.paragraphs:
+        # Calculate the height of the paragraph using its spacing information
+        space_before = paragraph.paragraph_format.space_before
+        space_before = space_before.pt if space_before is not None else 0
+
+        space_after = paragraph.paragraph_format.space_after
+        space_after = space_after.pt if space_after is not None else 0
+        print(space_after,space_before)
+        font_size = paragraph.runs[0].font.size.pt if paragraph.runs and paragraph.runs[0].font.size else 0
+
+        line_spacing = paragraph.paragraph_format.line_spacing
+        line_spacing = line_spacing if line_spacing is not None else 1.15
+        paragraph_height = space_before + space_after + line_spacing * font_size
+        content_height += paragraph_height
+        section = doc.sections[0]
+        page_height = section.page_height
+        print(content_height,page_height,top_margin,bottom_margin)
+
+    # Estimate the remaining space on the page
+    remaining_space = page_height - top_margin - bottom_margin - content_height
+
+    print(f"The remaining space on the page is approximately {remaining_space} points.")
 
 def run_functions(js):
     doc = create_protocol('Funktionskontrolllekplatsdemo',"Lista_lekplats_besiktningsprotokoll",js)
