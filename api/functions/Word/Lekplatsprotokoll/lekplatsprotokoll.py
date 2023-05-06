@@ -161,6 +161,7 @@ def populate_template(js1, certifikatjs, js, trigger):
     bighead.font.size = Pt(22)
     bighead.font.color.rgb = RGBColor(100,200,100)
     print(str(js1['ID'])+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum'])
+    doc.add_page_break()
     add_översiktsbild(doc,js)
     add_utrustning(doc,js)
     # add_page_break(doc)
@@ -186,7 +187,6 @@ def add_översiktsbild(doc,js):
         table = doc.add_table(rows=1,cols=1)
         row = table.add_row().cells
         row[0].add_paragraph().add_run().add_picture(img)
-        add_page_break(doc)
     return None
 def add_utrustning(doc,js):
     # Add the table for the Utrustnings items:
