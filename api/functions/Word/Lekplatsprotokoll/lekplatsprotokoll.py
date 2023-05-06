@@ -235,8 +235,8 @@ def add_utrustning(doc,js):
         cell.width = Inches(0.7)
     for cell in table.columns[4].cells:
         cell.width = Inches(0.8)
-    # doc.add_page_break()
-    doc.add_paragraph()
+    doc.add_page_break()
+    
     doc.add_heading('Besiktningsresultat', 0).style = 'Big heading'
     
     table = doc.add_table(rows=1, cols=3)
