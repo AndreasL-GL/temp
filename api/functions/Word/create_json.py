@@ -41,7 +41,7 @@ def create_json_for_word_functions(js):
         items_list.append([{
             "Bild": fIDItem["Bild"],
             "Område": item['Omr_x00e5_de'] + ', ' + item['Ort'],
-            "Bildkommentar":[item["Bildkommentar"] if "Bildkommentar" in item.keys() else ""][0].encode('latin1').decode('utf-8')
+            "Bildkommentar":[item["Bildkommentar"] if "Bildkommentar" in item.keys() else ""][0]
         } for fIDItem in fID if fIDItem['ID']==item['ID']])
     komplett_bildlista = []
     for i in items_list:
