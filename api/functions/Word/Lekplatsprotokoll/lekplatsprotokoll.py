@@ -228,7 +228,8 @@ def add_utrustning(doc,js):
         
         if "Utegymredskap" in item['Items'].keys() and "Utrustning" not in item['Items'].keys(): row[1].text = item['Items']['Utegymredskap']['Value']
         else : row[1].text = item['Items']['Utrustning']['Value']
-        row[2].text = item['Items']['Tillverkare_x002f_artnr']
+        if "Tillverkare_x002f_artnr" in item.keys(): row[2].text = item['Items']['Tillverkare_x002f_artnr']
+        else: row[2].text = '-'
         row[3].text = item['Items']['OData__x00c5_rtal']
         row[4].text = "Bild: "+str(i+1)
     
@@ -560,11 +561,32 @@ def run_functions(js):
 
 
 if __name__ == '__main__':
-    with open(os.path.join(os.path.dirname(__file__),'sample.json'),'r', encoding="utf-8") as f:
+    # with open(os.path.join(os.path.dirname(__file__),'sample.json'),'r', encoding="utf-8") as f:
+    #     js = json.load(f)
+    # doc = create_protocol('Funktionskontrolllekplatsdemo',"Lista_lekplats_besiktningsprotokoll",js)
+    
+    with open(os.path.join(os.path.dirname(__file__),'tt.json'),'r', encoding="utf-8") as f:
         js = json.load(f)
-    doc = create_protocol('Funktionskontrolllekplatsdemo',"Lista_lekplats_besiktningsprotokoll",js)
-    
-    
+        
+    for item in js['body']['value']:
+        try: 
+            print(item["Tillverkare_x002f_artnr"])
+        except:
+            print(item.keys())
+            first = [item for item in item.keys()]
+            print(item)
+        
+    for item in js['body']['value']:
+        for key,value in item.items():
+            if item[key] == '':
+                print(value)
+        print(item.keys())
+        second = [item for item in item.keys()]
+        break
+    for item in second:
+        if item not in first:
+            print(item)
+        
     'Fitness mall ej cert.docx'
     #get_cert_no("Funktionskontrolllekplatsdemo","Certifikatinformation","True")
 

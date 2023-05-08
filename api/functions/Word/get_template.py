@@ -81,13 +81,14 @@ def get_body_from_sharepoint_api(js):
         if item['StaticName'] not in sharepoint_columns_remove_list:
             resultlist.append({"Moment":item['Title'], "link":item['StaticName']})
     return resultlist
-def get_fields(site="", list_="MKB Egenkontroll Augustenborg Periodiska 2023"):
+def get_fields(site="", list_="MKB Egenkontroll Periodiska 2023"):
     headers=get_sharepoint_access_headers_through_client_id()
     tenant = "greenlandscapingmalmo"
     #site = site.split('sites/')[1]
     url = f"https://{tenant}.sharepoint.com/sites/GLMalmAB-EgenkontrollerVellingebostder/_api/web/lists/getbytitle('{list_}')/fields"
     l = requests.get(url, headers=headers)
     js= json.loads(l.text)
+    
     js = get_body_from_sharepoint_api(js)
     return js
 

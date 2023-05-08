@@ -29,9 +29,8 @@ def add_template_data(file, tbl):
     """
     doc = mailmerge.MailMerge(file)
     content= tbl["content"]
-    info = {k:v for k,v in tbl.items() if k!="content"}
-    
-    print(doc.get_merge_fields())
+    info = {k:v for k,v in tbl.items() }#if k!="content"}
+
     doc.merge(**info)
     doc.merge_rows('Område',content)
     
@@ -88,7 +87,19 @@ def change_icon_in_header(doc):
 def run_functions(js):
     """Runs all the different functions. Takes json as input, returns a json with file-content and filename."""
     title = js["Title"]
-    kontrollmoment = get_template.get_fields()
+
+    kontrollmoment = get_template.get_fields(title)
+    with open('001file.json', "w", encoding='utf-8') as f:
+        json.dump(kontrollmoment,f, indent=4, ensure_ascii=False)
+    js['Items']['value'][0]['Kontrollmoment']
+    for i,item in enumerate(js['Items']['value']):
+        momentstr = ""
+        for jitem in item['Kontrollmoment']:
+            momentstr = momentstr+'- '+jitem['Value']+'\n'
+
+
+        js['Items']['value'][0]['Kontrollmoment'] = momentstr
+
     js["Kontrollmoment"] = kontrollmoment
     js = create_json.create_json_for_word_functions(js)
     file= download_template_file()
@@ -97,6 +108,7 @@ def run_functions(js):
     doc = change_icon_in_header(doc)
     file_content = io.BytesIO()
     doc.save(file_content)
+    doc.save(title+" Vecka "+js["Vecka"]+'.docx')
     file_content.seek(0)
     file_content=base64.b64encode(file_content.getvalue()).decode('utf-8')
     return {"content":file_content, "filename": title+" Vecka "+js["Vecka"]}
@@ -109,6 +121,6 @@ def download_template_file():
     return file_content
 if __name__ == '__main__':
     
-    with open('ActionOutputs (2).json', 'r', encoding="utf-8") as f:
-        js = json.load(f)
-    run_functions(js)
+    with open('test.json', 'r', encoding="utf-8") as f:
+        js = json.load(f, )
+    run_functions(js['body'])
