@@ -17,5 +17,7 @@ def accept_protokoll(): #WORKING
 def protokoll(): 
     json_content = request.get_json()
     print(json_content.keys())
-    json_content = lekplatsprotokoll.run_functions(json_content)
+    try: json_content = lekplatsprotokoll.run_functions(json_content)
+    except Exception as e:
+        json_content = {str(e)}
     return jsonify(json_content)
