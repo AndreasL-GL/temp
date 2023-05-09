@@ -110,13 +110,15 @@ def populate_template(js1, certifikatjs, js, trigger):
     js1["Rutinerf_x00f6_runderh_x00e5_ll"] = "Ja" if js1["Rutinerf_x00f6_runderh_x00e5_ll"]==True else "Nej"
     js1["Leverant_x00f6_rensanvisningar"] = "Ja" if js1["Leverant_x00f6_rensanvisningar"]==True else "Nej"
     js1["Sparandeavdokument"] = "Ja" if js1["Sparandeavdokument"]==True else "Nej"
-
+    
     mergefields = {key:value for key,value in js1.items() if key in [x for x in doc.get_merge_fields()]}
-    icon_file = requests.get(icons[js1['Bolag']], headers=get_sharepoint_access_headers_through_client_id()).content
+
 
     doc.merge(**mergefields)
     
-    
+    if js1['Bolag'] not in icons.keys(): bolag = "Green Landscaping AB"
+    else: bolag = js1['Bolag']
+    icon_file = requests.get(icons[bolag], headers=get_sharepoint_access_headers_through_client_id()).content
     ### TYPE CHANGE: type(doc) = docx.Document object from here.
     doc = change_icon_in_header(doc, icon_file, "word/media/image1.png")
     if js1['Typavbesiktning']['Value'] == "Installationsbesiktning":
