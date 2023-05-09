@@ -36,11 +36,19 @@ def get_cert_no(site,certlist, fitness):
 
 
 def create_protocol(site, lista, js):
+
+    
+    if 'Certifikatinfo' not in js.keys():js = js['body']
     certifikatjs = js['Certifikatinfo']['value'][0]
+    
+    for item in js['Items']['value']:
+        if 'Adress' not in item.keys():
+            item['Adress'] = ' '
     trigger = js['Trigger']
     
     js1 = js["Items"]['value'][0]
-
+    if not any(certifikatjs): js1['Certnr'] = 'saknas'
+    
     js1['Informationsskylt'] = ['Finns' if js1['Informationsskylt'] else 'Saknas på ett eller flera redskap'][0]
     js1['Anv_x00e4_ndarinformation'] = ['Finns' if js1['Anv_x00e4_ndarinformation'] else 'Saknas på ett eller flera redskap'][0]
     js1['M_x00e4_rkningavredskap_x002f_ty'] = ['Finns' if js1['M_x00e4_rkningavredskap_x002f_ty'] else 'Saknas på ett eller flera redskap'][0]
@@ -85,16 +93,17 @@ def populate_template(js1, certifikatjs, js, trigger):
     js1["Adresstillprotokoll"] = certifikatjs['Adresstillprotokoll']
     js1['Created'] = js1['Created'].split('T')[0]
     js1['Certnr'] = certifikatjs['Certnr']
-    if not trigger['DigitalsignaturUtegym'] and js1['Fitnessbesiktning']:
+    print(js1.keys(),'\n\n', trigger.keys())
+    print(trigger['DigitalsignaturUtegym'], js1['Fitnessbesiktning'], trigger['DigitalsignaturLekplats'])
+    print(js1["Certnr"])
+    if js1["Certnr"].lower() == 'saknas' and js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Fitness mall ej cert.docx'))
-    elif trigger['DigitalsignaturUtegym'] and js1['Fitnessbesiktning']:
+    elif js1["Certnr"].lower() != 'saknas' and js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Fitness mall cert.docx'))
-    elif trigger['DigitalsignaturLekplats'] and not js1['Fitnessbesiktning']:
+    elif js1["Certnr"].lower() != 'saknas' and not js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Lekplatsbesiktning mall cert.docx'))
-        print("Hello")
-    elif not trigger['DigitalsignaturLekplats'] and not js1['Fitnessbesiktning']:
+    elif js1["Certnr"].lower() == 'saknas' and not js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Lekplatsbesiktning mall ej cert.docx'))
-        
  
 
     js1["H_x00e4_nvisningsskylt"] = "Ja" if js1["H_x00e4_nvisningsskylt"]==True else "Nej"
@@ -124,13 +133,13 @@ def populate_template(js1, certifikatjs, js, trigger):
     
     
     if not js1["Fitnessbesiktning"]:
-    
+
         match js1["Fysiskomfattning"]['Value']:
             case "Endast lekredskap":
                 file = io.BytesIO()
                 doc.save(file)
                 file.seek(0)
-                doc = docx.Document(set_checkbox_value(file.read(), 1,3)) # Årlig besiktning
+                doc = docx.Document(set_checkbox_value(file.read(), 1,2)) # Årlig besiktning
             case "Lekplats inklusive":
                 file = io.BytesIO()
                 doc.save(file)
@@ -145,18 +154,19 @@ def populate_template(js1, certifikatjs, js, trigger):
                 file = io.BytesIO()
                 doc.save(file)
                 file.seek(0)
-                doc = docx.Document(set_checkbox_value(file.read(), 1,5)) # Område på karta
+                doc = docx.Document(set_checkbox_value(file.read(), 1,4)) # Område på karta
+
         match js1["Drift_x002d_ochunderh_x00e5_llsp"]:
             case True:
                 file = io.BytesIO()
                 doc.save(file)
                 file.seek(0)
-                doc = docx.Document(set_checkbox_value(file.read(), 1,6)) # Underhållsplan True
+                doc = docx.Document(set_checkbox_value(file.read(), 1,5)) # Underhållsplan True
             case False:
                 file = io.BytesIO()
                 doc.save(file)
                 file.seek(0)
-                doc = docx.Document(set_checkbox_value(file.read(), 1,7)) # Underhållsplan False
+                doc = docx.Document(set_checkbox_value(file.read(), 1,6)) # Underhållsplan False
     st = [style.type for style in doc.styles if style.name == 'Heading 1'][0]
     bighead = doc.styles.add_style('Big heading', st)
     bighead.font.size = Pt(22)
@@ -313,7 +323,8 @@ def add_underlag(doc,js):
     hh.style = 'Big heading'
     #images = [img['Image'][0] for img in js['Anmärkningar']]
     hh.paragraph_format.keep_with_next=True
-    
+    if not any(js['Underlag']):
+        p = doc.add_paragraph('Inga kommentarer gällande underlag')
     for i, item in enumerate(js['Underlag']):
         p = doc.add_paragraph()
         p.text = 'Produkt '+str([i+1 for i, utr in enumerate(js['Utrustning']) if utr['Items']['ID'] == item['UtrustningsID']][0])+':' + item['Utrustning']
@@ -555,7 +566,10 @@ def run_functions(js):
     file = io.BytesIO()
     doc.save(file)
     file.seek(0)
-    js1 = js['Items']['value'][0]
+
+    if "Items" in js.keys():js1 = js['Items']['value'][0]
+    else: js1 = js['body']['Items']['value'][0]
+
     #file = compress_word_file(file.getvalue())
     filename=str(js1['ID'])+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum']
     return {"content": base64.b64encode(file.getvalue()).decode('utf-8'), "filename": filename}
@@ -568,28 +582,29 @@ if __name__ == '__main__':
     
     with open(os.path.join(os.path.dirname(__file__),'tt.json'),'r', encoding="utf-8") as f:
         js = json.load(f)
+        run_functions(js)
         
-    for item in js['body']['value']:
-        try: 
-            print(item["Tillverkare_x002f_artnr"])
-        except:
-            print(item.keys())
-            first = [item for item in item.keys()]
-            print(item)
+    # for item in js['body']['Items']['value']:
+    #     try: 
+    #         print(item["Tillverkare_x002f_artnr"])
+    #     except:
+    #         print(item.keys())
+    #         first = [item for item in item.keys()]
+    #         print(item)
         
-    for item in js['body']['value']:
-        for key,value in item.items():
-            if item[key] == '':
-                print(value)
-        print(item.keys())
-        second = [item for item in item.keys()]
-        break
-    for item in second:
-        if item not in first:
-            print(item)
+    # for item in js['body']['value']:
+    #     for key,value in item.items():
+    #         if item[key] == '':
+    #             print(value)
+    #     print(item.keys())
+    #     second = [item for item in item.keys()]
+    #     break
+    # for item in second:
+    #     if item not in first:
+    #         print(item)
         
-    'Fitness mall ej cert.docx'
-    #get_cert_no("Funktionskontrolllekplatsdemo","Certifikatinformation","True")
+    # 'Fitness mall ej cert.docx'
+    # #get_cert_no("Funktionskontrolllekplatsdemo","Certifikatinformation","True")
 
     
     """"""
