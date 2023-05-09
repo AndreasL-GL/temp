@@ -82,9 +82,10 @@ Samt av fitnessutrustning
     
     
 def populate_template(js1, certifikatjs, js, trigger):
-    if (trigger['DigitalsignaturLekplats'] or trigger['DigitalsignaturUtegym']) and 'Digital signatur' in js.keys() and 'Digital signatur 2' in js.keys():
+    
+    if trigger['DigitalsignaturLekplats'] or trigger['DigitalsignaturUtegym']:
         js1['Digital signatur'] = "Härmed intygas att besiktningen utförts enligt gällande regler."
-        js1['Digital signatur 2'] = "Digitalt signerad av "+js1['Author']['DisplayName']+', '+ js1['Created'].split('T')[0]
+        js1['Digital signatur 2'] = "Digitalt signerad av "+trigger['Author']['DisplayName']+', '+ trigger['Created'].split('T')[0]
     if 'Digital signatur' in js1.keys() and 'Digital signatur 2' in js1.keys():
         js1['digsign'] = js1['Digital signatur']
         js1['digsign2'] = js1['Digital signatur 2']
@@ -93,9 +94,7 @@ def populate_template(js1, certifikatjs, js, trigger):
     js1["Adresstillprotokoll"] = certifikatjs['Adresstillprotokoll']
     js1['Created'] = js1['Created'].split('T')[0]
     js1['Certnr'] = certifikatjs['Certnr']
-    print(js1.keys(),'\n\n', trigger.keys())
-    print(trigger['DigitalsignaturUtegym'], js1['Fitnessbesiktning'], trigger['DigitalsignaturLekplats'])
-    print(js1["Certnr"])
+    
     if js1["Certnr"].lower() == 'saknas' and js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Fitness mall ej cert.docx'))
     elif js1["Certnr"].lower() != 'saknas' and js1['Fitnessbesiktning']:
