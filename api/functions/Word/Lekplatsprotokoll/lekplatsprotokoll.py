@@ -77,8 +77,9 @@ def populate_template(js1, certifikatjs, js, trigger):
     if (trigger['DigitalsignaturLekplats'] or trigger['DigitalsignaturUtegym']) and 'Digital signatur' in js.keys() and 'Digital signatur 2' in js.keys():
         js1['Digital signatur'] = "Härmed intygas att besiktningen utförts enligt gällande regler."
         js1['Digital signatur 2'] = "Digitalt signerad av "+js1['Author']['DisplayName']+', '+ js1['Created'].split('T')[0]
-    js1['digsign'] = js1['Digital signatur']
-    js1['digsign2'] = js1['Digital signatur 2']
+    if 'Digital signatur' in js1.keys() and 'Digital signatur 2' in js1.keys():
+        js1['digsign'] = js1['Digital signatur']
+        js1['digsign2'] = js1['Digital signatur 2']
     if "Telefonnummer" not in certifikatjs.keys(): abort(400, message="Inget telefonnummer för besiktningsman.")
     js1["Besmantelefonnummer"] = certifikatjs["Telefonnummer"]
     js1["Adresstillprotokoll"] = certifikatjs['Adresstillprotokoll']
