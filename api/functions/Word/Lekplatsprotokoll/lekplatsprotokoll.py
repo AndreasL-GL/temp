@@ -341,8 +341,19 @@ def add_underlag(doc,js):
     hh.paragraph_format.keep_with_next=True
     if not any(js['Underlag']):
         p = doc.add_paragraph('Inga kommentarer gällande underlag')
+        return None
+    count=0
     for i, item in enumerate(js['Underlag']):
         p = doc.add_paragraph()
+        if 'Utrustning' not in item.keys():
+            if 'Kommentar' in item.keys():
+                item['Utrustning'] = item['Kommentar']
+            else:
+                item['Utrustning'] = 'Utrustning'
+                item['Kommentar'] = ['-']
+        if not any([i+1 for i, utr in enumerate(js['Utrustning']) if utr['Items']['ID'] == item['UtrustningsID']]):
+            continue
+        count+=1
         p.text = 'Produkt '+str([i+1 for i, utr in enumerate(js['Utrustning']) if utr['Items']['ID'] == item['UtrustningsID']][0])+':' + item['Utrustning']
         p.style = 'bold'
         p.paragraph_format.keep_with_next = True
