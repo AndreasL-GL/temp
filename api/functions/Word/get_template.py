@@ -94,7 +94,24 @@ def get_fields(site="", list_="MKB Egenkontroll Periodiska 2023"):
 
 if __name__ == '__main__':
     headers=get_sharepoint_access_headers_through_client_id()
-    url = "https://greenlandscapingmalmo.sharepoint.com/_api/search/query?querytext=%27contentclass:STS_SitePath:%22https://greenlandscapingmalmo.sharepoint.com/*%22%27&rowlimit=500"
+    #url = "https://greenlandscapingmalmo.sharepoint.com/_api/search/query?querytext=%27contentclass:STS_SitePath:%22https://greenlandscapingmalmo.sharepoint.com/*%22%27&rowlimit=500"
+    #l = requests.get(url, headers=headers)
+    #print(l.content)
+    headers=get_sharepoint_access_headers_through_client_id()
+    tenant = "greenlandscapingmalmo"
+    site = "Funktionskontrolllekplatsdemo"
+    filename = "Protokoll_2379_Svaleboskolan_Veberöd_2023-05-11.docx"
+    #server_relative_url = f"/sites/{site}/Delade Dokument/Protokoll lekplats besiktning demo/{filename}"
+    #url = f"https://{tenant}.sharepoint.com/sites/{site}/_api/web/GetFileByServerRelativeUrl('{server_relative_url}')/$value"
+    #l = requests.get(url, headers=headers)
+    #print(url)
+   # print(l.status_code)
+    server_relative_url = f"/sites/{site}/Delade Dokument/Protokoll lekplats besiktning demo" #PowerBI"#
+    url = f"""https://{tenant}.sharepoint.com/sites/{site}/_api/Web/GetFolderByServerRelativeUrl('{server_relative_url}')/Files?$filter= substringof('Ugglehallen', name)"""#name eq '2716_2020 - (Sida 2).png'"""
     l = requests.get(url, headers=headers)
+    js = json.loads(l.content)
     print(l.content)
-    
+    for item in js['d']['results']:
+        print(item['Name'])
+    #print(l.content.decode('unicode-escape'))
+    #print(l.status_code)

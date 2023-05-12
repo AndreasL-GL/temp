@@ -172,6 +172,13 @@ def populate_template(js1, certifikatjs, js, trigger):
     bighead = doc.styles.add_style('Big heading', st)
     bighead.font.size = Pt(22)
     bighead.font.color.rgb = RGBColor(100,200,100)
+    smallhead = doc.styles.add_style('Small heading', st)
+    smallhead.font.size = Pt(16)
+    smallhead.font.color.rgb = RGBColor(100,200,100)
+    imgp = doc.styles.add_style('imgp', st)
+    imgp.font.size = Pt(11)
+    imgp.font.color.rgb = RGBColor(100,200,100)
+    
     doc.add_page_break()
     add_översiktsbild(doc,js)
     add_utrustning(doc,js)
@@ -234,7 +241,8 @@ def add_utrustning(doc,js):
     row[4].text = "Bild nr"
     
     for i, item in enumerate(js["Utrustning"]):
-        row = table.add_row().cells
+        row = table.add_row()
+        row=row.cells
         row[0].text = str(i+1)
         row[0].width = Inches(0.2)
         
@@ -242,6 +250,7 @@ def add_utrustning(doc,js):
         else : row[1].text = item['Items']['Utrustning']['Value']
         if "Tillverkare_x002f_artnr" in item.keys(): row[2].text = item['Items']['Tillverkare_x002f_artnr']
         else: row[2].text = '-'
+        if "OData__x00c5_rtal" not in item["Items"].keys(): item['Items']['OData__x00c5_rtal'] = 'Saknas'
         row[3].text = item['Items']['OData__x00c5_rtal']
         row[4].text = "Bild: "+str(i+1)
     
@@ -255,9 +264,11 @@ def add_utrustning(doc,js):
         cell.width = Inches(0.7)
     for cell in table.columns[4].cells:
         cell.width = Inches(0.8)
-    doc.add_page_break()
     
-    doc.add_heading('Besiktningsresultat', 0).style = 'Big heading'
+    hh = doc.add_heading('Besiktningsresultat', 0)
+    hh.style = 'Big heading'
+    hh.style.paragraph_format.keep_with_next=True
+    
     
     
     
@@ -275,6 +286,10 @@ def add_utrustning(doc,js):
     row = table.add_row().cells
     for img, index in imagedict.items():
         pt = row[index0].add_paragraph()
+
+        pt.style = 'Small heading'
+
+        pt.style.paragraph_format.keep_with_next=True
         pt.text = 'Bild: ' + str(index)
         file = io.BytesIO(base64.b64decode(img))
         file.seek(0)
@@ -359,7 +374,7 @@ def add_anmärkningar(doc, js):
         h.style= 'subheading'
         h.paragraph_format.keep_with_next = True
         if item['Items']['{HasAttachments}']:
-            table = doc.add_table(rows=0, cols=4)
+            table=doc.add_table(rows=0, cols=4)
             index = 0
             table.style.paragraph_format.keep_together = True
             while index < len(item['Image']):
@@ -372,7 +387,8 @@ def add_anmärkningar(doc, js):
                     file.seek(0)
                     file = resize_and_autoorient(file,100,100)
                     p=row[i].add_paragraph()
-                    p.paragraph_format.keep_with_next=True
+                    p.style= 'imgp'
+                    # p.style.paragraph_format.keep_with_next=True
                     run = p.add_run()
                     picture = run.add_picture(file)
                     index +=1
@@ -382,8 +398,8 @@ def add_anmärkningar(doc, js):
         table.style = 'Grid Table Light'
         table.style.paragraph_format.keep_with_next = True
         row = table.rows[0].cells
-        row[0].text = item['Items']['Kommentar']
-        row[1].text = item['Items']['Bed_x00f6_mning']['Value']
+        row[0].add_paragraph().text = item['Items']['Kommentar']
+        row[1].add_paragraph().text = item['Items']['Bed_x00f6_mning']['Value']
         for cell in table.columns[0].cells:
             cell.width = Inches(6)
         for cell in table.columns[1].cells:
@@ -438,7 +454,8 @@ def add_grindar(doc, js):
                     file.seek(0)
                     file = resize_and_autoorient(file,100,100)
                     p=row[i].add_paragraph()
-                    picture = p.add_run().add_picture(file)
+                    picture = p.add_run()
+                    picture.add_picture(file)
 
                     index +=1
                     
@@ -489,7 +506,8 @@ def add_brunnar(doc,js):
                     file.seek(0)
                     file = resize_and_autoorient(file,100,100)
                     p=row[i].add_paragraph()
-                    picture = p.add_run().add_picture(file)
+                    picture = p.add_run()
+                    picture.add_picture(file)
 
                     index +=1
                     
@@ -572,7 +590,7 @@ def run_functions(js):
     else: js1 = js['body']['Items']['value'][0]
 
     #file = compress_word_file(file.getvalue())
-    filename=str(js1['ID'])+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum']
+    filename="Protokoll_"+str(js1['ID'])+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum']
     return {"content": base64.b64encode(file.getvalue()).decode('utf-8'), "filename": filename}
 
 

@@ -67,9 +67,7 @@ def create_json_for_word_functions(js):
         for li in links:
             if li not in item.keys():
                 item[li] = True
-        [print(key) for key in item.keys() if key.startswith('Sk_x00f6_tselh_x00e5')]
        # [print(link) for link in links if item[link]]
-        print('')
         kontrollmoment = [link for link in item.keys() if link in links and item[link] and link != "Test"]
         kontrollmoment = [js["Kontrollmoment"][key]["Moment"] for key in range(len(js["Kontrollmoment"])) if js["Kontrollmoment"][key]["link"] in kontrollmoment]
         #[print(item) for item in kontrollmoment]
