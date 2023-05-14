@@ -91,14 +91,13 @@ def run_functions(js):
     
     with open('001file.json', "w", encoding='utf-8') as f:
         json.dump(kontrollmoment,f, indent=4, ensure_ascii=False)
-    js['Items']['value'][0]['Kontrollmoment']
-    for i,item in enumerate(js['Items']['value']):
-        momentstr = ""
-        for jitem in item['Kontrollmoment']:
-            momentstr = momentstr+'- '+jitem['Value']+'\n'
+    # for i,item in enumerate(js['Items']['value']):
+    #     momentstr = ""
+    #     for jitem in item['Kontrollmoment']:
+    #         momentstr = momentstr+'- '+jitem['Value']+'\n'
 
 
-        js['Items']['value'][0]['Kontrollmoment'] = momentstr
+    #     js['Items']['value'][0]['Kontrollmoment'] = momentstr
 
     js["Kontrollmoment"] = kontrollmoment
     js = create_json.create_json_for_word_functions(js)
