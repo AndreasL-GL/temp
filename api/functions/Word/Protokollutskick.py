@@ -97,7 +97,7 @@ def run_functions(js):
             momentstr = momentstr+'- '+jitem['Value']+'\n'
 
 
-        js['Items']['value'][0]['Kontrollmoment'] = momentstr
+        js['Items']['value'][i]['Kontrollmoment'] = momentstr
 
     js["Kontrollmoment"] = kontrollmoment
     js = create_json.create_json_for_word_functions(js)
