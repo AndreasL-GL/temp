@@ -394,18 +394,17 @@ def add_anmärkningar(doc, js):
     hh.style = 'Big heading'
     hh.style.paragraph_format.keep_with_next = True
     #images = [img['Image'][0] for img in js['Anmärkningar']]
-    utrustningsnycklar = []
-    [utrustningsnycklar.append(item['Items'].keys()) for item in js['Utrustning']]
+
     for i, item in enumerate(js['Anmärkningar']):
         utrustningslista = [(utrustning['Items']['Montering_under_mark'], utrustning['Items']['Montering_ovan_mark']) for utrustning in js['Utrustning'] if utrustning['Items']['ID'] == item['Items']['UtrustningsID'] and 'Montering ovan Mark' in utrustning['Items'].keys()]
         if any(utrustningslista):
             montering_under_mark, montering_ovan_mark = utrustningslista[0]
-        
+        item['montering_under_mark'] = montering_under_mark
+        item['montering_ovan_mark'] = montering_ovan_mark
         if 'Utrustningstyp0' or 'Utrustningstyp' in item['Items'].keys(): 
             utrustning = [items['Items']['Utrustning']['Value'] for items in js['Utrustning'] if items['Items']['ID'] == item['Items']['UtrustningsID']][0]
             h = doc.add_heading('Produkt '+str(i+1)+', '+ utrustning, 0)
             
-            print(json.dumps(utrustning, indent=4, ensure_ascii=False), i)
         else: h = doc.add_heading('Produkt '+str(i+1)+', '+'Gymutrustning')
         
         h.style= 'subheading'
@@ -465,8 +464,30 @@ def add_anmärkningar(doc, js):
                 cell.width = Inches(6)
             for cell in table.columns[1].cells:
                 cell.width = Inches(0.4)
-        
+            p = doc.add_paragraph()
+            p.text = "Enligt SS EN 1176-1:6.2.2 "
+            p.style = 'small'
                 
+                
+            ph = doc.add_paragraph()
+            ph.text = "Montering under mark"
+            ph.style = 'subheading'
+            ph.style.paragraph_format.keep_with_next=True
+            
+            table = doc.add_table(rows=1, cols=2)
+            table.style = 'Grid Table Light'
+            table.style.paragraph_format.keep_with_next = True
+            row = table.rows[0].cells
+            row[0].add_paragraph().text = montering_under_mark
+            row[1].add_paragraph().text = '-'
+            for cell in table.columns[0].cells:
+                cell.width = Inches(6)
+            for cell in table.columns[1].cells:
+                cell.width = Inches(0.4)
+            p = doc.add_paragraph()
+            p.text = "Enligt SS EN 1176-1:6.2.2"
+            p.style = 'small'
+            
         # row0 = table.rows[0].cells
         # h = doc.add_heading('Produkt '+str(i+1)+', '+ [item['Items']['Utrustningstyp0'] if 'Utrustningstyp0' in item['Items'].keys() else 'Gymredskap'][0], 0)
         # h.style= 'subheading'
