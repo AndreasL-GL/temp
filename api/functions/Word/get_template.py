@@ -109,7 +109,6 @@ def get_body_from_sharepoint_api(js):
     resultlist = [item for item in resultlist if item['link'] not in removelist2]
     
     
-    [print(j['link'], j['Moment']) for j in resultlist]
 
     return resultlist
 def get_fields(site="GLMalmAB-EgenkontrollerVellingebostder", list_="MKB Egenkontroll Periodiska 2023"):

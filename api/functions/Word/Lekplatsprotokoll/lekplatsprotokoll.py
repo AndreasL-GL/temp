@@ -48,7 +48,6 @@ def create_protocol(site, lista, js):
     
     js1 = js["Items"]['value'][0]
     if not any(certifikatjs): js1['Certnr'] = 'saknas'
-    
     js1['Informationsskylt'] = ['Finns' if js1['Informationsskylt'] else 'Saknas på ett eller flera redskap'][0]
     js1['Anv_x00e4_ndarinformation'] = ['Finns' if js1['Anv_x00e4_ndarinformation'] else 'Saknas på ett eller flera redskap'][0]
     js1['M_x00e4_rkningavredskap_x002f_ty'] = ['Finns' if js1['M_x00e4_rkningavredskap_x002f_ty'] else 'Saknas på ett eller flera redskap'][0]
@@ -93,6 +92,7 @@ def populate_template(js1, certifikatjs, js, trigger):
     js1["Besmantelefonnummer"] = certifikatjs["Telefonnummer"]
     js1["Adresstillprotokoll"] = certifikatjs['Adresstillprotokoll']
     js1['Created'] = js1['Created'].split('T')[0]
+    if not 'Certnr' in certifikatjs.keys(): certifikatjs['Certnr'] = 'saknas'
     js1['Certnr'] = certifikatjs['Certnr']
     
     if js1["Certnr"].lower() == 'saknas' and js1['Fitnessbesiktning']:
@@ -300,8 +300,22 @@ def add_utrustning(doc,js):
         if index0 ==3:
             row = table.add_row().cells
             index0 = 0
+    if js['Items']['value'][0]['Typavbesiktning']['Value'] == 'Installationsbesiktning':
         
-        
+        for i, item in enumerate(js['Utrustning']):
+            if "Utegymredskap" in item['Items'].keys() and "Utrustning" not in item['Items'].keys(): Produkt = item['Items']['Utegymredskap']['Value']
+            else : Produkt = item['Items']['Utrustning']['Value']
+            
+
+            # table = doc.add_table(rows=1, cols=5)
+            # table.style = 'Grid Table 1 Light'
+            # row = table.rows[0].cells
+            # row[0].text = 'Nr'
+            # row[0].width = Inches(0.2)
+            # row[1].text = "Produkt"
+            # row[2].text = "Tillverkare/artnr"
+            # row[3].text = "Årtal"
+            # row[4].text = "Bild nr"
     # while index1 < len(js['Utrustning']):
     #     index = 0
     #     while index < len(js['Utrustning'][index1]['Image']):
@@ -380,8 +394,20 @@ def add_anmärkningar(doc, js):
     hh.style = 'Big heading'
     hh.style.paragraph_format.keep_with_next = True
     #images = [img['Image'][0] for img in js['Anmärkningar']]
+    utrustningsnycklar = []
+    [utrustningsnycklar.append(item['Items'].keys()) for item in js['Utrustning']]
     for i, item in enumerate(js['Anmärkningar']):
-        h = doc.add_heading('Produkt '+str(i+1)+', '+ [item['Items']['Utrustningstyp0'] if 'Utrustningstyp0' in item['Items'].keys() else 'Gymredskap'][0], 0)
+        utrustningslista = [(utrustning['Items']['Montering_under_mark'], utrustning['Items']['Montering_ovan_mark']) for utrustning in js['Utrustning'] if utrustning['Items']['ID'] == item['Items']['UtrustningsID'] and 'Montering ovan Mark' in utrustning['Items'].keys()]
+        if any(utrustningslista):
+            montering_under_mark, montering_ovan_mark = utrustningslista[0]
+        
+        if 'Utrustningstyp0' or 'Utrustningstyp' in item['Items'].keys(): 
+            utrustning = [items['Items']['Utrustning']['Value'] for items in js['Utrustning'] if items['Items']['ID'] == item['Items']['UtrustningsID']][0]
+            h = doc.add_heading('Produkt '+str(i+1)+', '+ utrustning, 0)
+            
+            print(json.dumps(utrustning, indent=4, ensure_ascii=False), i)
+        else: h = doc.add_heading('Produkt '+str(i+1)+', '+'Gymutrustning')
+        
         h.style= 'subheading'
         h.paragraph_format.keep_with_next = True
         if item['Items']['{HasAttachments}']:
@@ -419,6 +445,28 @@ def add_anmärkningar(doc, js):
         p1 = doc.add_paragraph()
         p1.text = item['Items']['Utrustningstyp']['Value']
         p1.style = 'small'
+        
+        # smallhead = doc.styles.add_style('Underovanmark', doc.styles)
+        # smallhead.font.size = Pt(14)
+        # smallhead.font.color.rgb = RGBColor(100,200,100)
+        if any(utrustningslista):
+            ph = doc.add_paragraph()
+            ph.text = "Montering ovan mark"
+            ph.style = 'subheading'
+            ph.style.paragraph_format.keep_with_next=True
+            
+            table = doc.add_table(rows=1, cols=2)
+            table.style = 'Grid Table Light'
+            table.style.paragraph_format.keep_with_next = True
+            row = table.rows[0].cells
+            row[0].add_paragraph().text = montering_ovan_mark
+            row[1].add_paragraph().text = '-'
+            for cell in table.columns[0].cells:
+                cell.width = Inches(6)
+            for cell in table.columns[1].cells:
+                cell.width = Inches(0.4)
+        
+                
         # row0 = table.rows[0].cells
         # h = doc.add_heading('Produkt '+str(i+1)+', '+ [item['Items']['Utrustningstyp0'] if 'Utrustningstyp0' in item['Items'].keys() else 'Gymredskap'][0], 0)
         # h.style= 'subheading'
@@ -599,7 +647,7 @@ def run_functions(js):
 
     if "Items" in js.keys():js1 = js['Items']['value'][0]
     else: js1 = js['body']['Items']['value'][0]
-
+    
     #file = compress_word_file(file.getvalue())
     filename="Protokoll_"+str(js1['ID'])+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum']
     return {"content": base64.b64encode(file.getvalue()).decode('utf-8'), "filename": filename}
@@ -614,31 +662,5 @@ if __name__ == '__main__':
         js = json.load(f)
         run_functions(js)
         
-    # for item in js['body']['Items']['value']:
-    #     try: 
-    #         print(item["Tillverkare_x002f_artnr"])
-    #     except:
-    #         print(item.keys())
-    #         first = [item for item in item.keys()]
-    #         print(item)
-        
-    # for item in js['body']['value']:
-    #     for key,value in item.items():
-    #         if item[key] == '':
-    #             print(value)
-    #     print(item.keys())
-    #     second = [item for item in item.keys()]
-    #     break
-    # for item in second:
-    #     if item not in first:
-    #         print(item)
-        
-    # 'Fitness mall ej cert.docx'
-    # #get_cert_no("Funktionskontrolllekplatsdemo","Certifikatinformation","True")
 
-    
-    """"""
-    # url = "https://greenlandscapingmalmo.sharepoint.com/sites/Funktionskontrolllekplatsdemo/_api/web/GetFileByServerRelativeUrl('/sites/Funktionskontrolllekplatsdemo/Lists/Lista_lekplats_besiktningsprotokoll/Attachments/2171/4929E5D2-6190-495A-AF7F-2523EC1D5AA9.jpg')/$value"
-    # img = requests.get(url, get_sharepoint_access_headers_through_client_id())
-    
     ### TODO:

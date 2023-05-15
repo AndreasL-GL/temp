@@ -102,7 +102,7 @@ def get_item_based_on_id(id,site, list_):
 def get_all_items(site, list_):
     headers=get_sharepoint_access_headers_through_client_id()
     tenant = "greenlandscapingmalmo"
-    url = f"https://{tenant}.sharepoint.com/sites/{site}/_api/web/lists/getbytitle('{list_}')"
+    url = f"https://{tenant}.sharepoint.com/sites/{site}/_api/web/lists/getbytitle('{list_}')/items"
     l = requests.get(url, headers=headers)
     js= json.loads(l.text)
     return js
@@ -130,7 +130,23 @@ def Download_icon(url):
 
 
 if __name__ == '__main__':
-    headers=get_sharepoint_access_headers_through_client_id()
-    url = "https://greenlandscapingmalmo.sharepoint.com/_api/search/query?querytext=%27contentclass:STS_SitePath:%22https://greenlandscapingmalmo.sharepoint.com/*%22%27&rowlimit=500"
-    l = requests.get(url, headers=headers)
-    
+    # headers=get_sharepoint_access_headers_through_client_id()
+    # url = "https://greenlandscapingmalmo.sharepoint.com/_api/search/query?querytext=%27contentclass:STS_SitePath:%22https://greenlandscapingmalmo.sharepoint.com/*%22%27&rowlimit=500"
+    # l = requests.get(url, headers=headers)
+    # js = get_all_items("Egenkontroller_Trollhttan341","Egenkontroll_lista_protokoll")
+    import base64
+    from PIL import Image
+    import io
+    with open(os.path.join(os.path.dirname(__file__), 'egenkontroll_skötsel.json'), 'r', encoding='utf-8') as f:
+        js = json.load(f)
+    results = js['d']['results']
+    for item in results:
+        for key in item.keys():
+            if "bild" in key.lower() and "komm" not in key.lower(): 
+                print(key)
+                if item[key] is not None: 
+                    print(key)
+                    img = io.BytesIO(base64.b64decode(item[key]))
+                    img.seek(0)
+                    img = Image.open(img)
+                    img.show()
