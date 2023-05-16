@@ -7,14 +7,16 @@ import configparser, os
 import urllib.parse
 import requests
 import json
+
+
 config = configparser.ConfigParser()
 config.read(os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)),'config'),"config.ini"))
 tenant = config["SHAREPOINT"]["tenant"]
 def require_api_key(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        api_key = request.args.get("API_KEYS")
-        if False:
+        api_key = request.args.get("API_KEY")
+        if api_key not in config["DEFAULTS"]['API_KEYS']:
             abort(401, description="Invalid API key")
         return func(*args, **kwargs)
     return decorated_function

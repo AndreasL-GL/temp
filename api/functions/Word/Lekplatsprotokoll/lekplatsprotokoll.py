@@ -171,13 +171,13 @@ def populate_template(js1, certifikatjs, js, trigger):
     st = [style.type for style in doc.styles if style.name == 'Heading 1'][0]
     bighead = doc.styles.add_style('Big heading', st)
     bighead.font.size = Pt(22)
-    bighead.font.color.rgb = RGBColor(100,200,100)
+    bighead.font.color.rgb = RGBColor(96,167,48)
     smallhead = doc.styles.add_style('Small heading', st)
     smallhead.font.size = Pt(16)
-    smallhead.font.color.rgb = RGBColor(100,200,100)
+    smallhead.font.color.rgb = RGBColor(96,167,48)
     imgp = doc.styles.add_style('imgp', st)
     imgp.font.size = Pt(11)
-    imgp.font.color.rgb = RGBColor(100,200,100)
+    imgp.font.color.rgb = RGBColor(96,167,48)
     
     doc.add_page_break()
     add_översiktsbild(doc,js)
@@ -212,18 +212,20 @@ def add_översiktsbild(doc,js):
         img = resize_and_autoorient(image,300,320)
         table = doc.add_table(rows=1,cols=1)
         row = table.add_row().cells
-        row[0].add_paragraph().add_run().add_picture(img)
+        row[0].paragraphs[0].add_run().add_picture(img)
     return None
+
+
 def add_utrustning(doc,js):
     # Add the table for the Utrustnings items:
     h = doc.add_heading('Produktbeskrivning')
     h.style = 'Big heading'
     subheading = doc.styles.add_style('subheading', h.style.type)
     subheading.font.size = Pt(16)
-    subheading.font.color.rgb = RGBColor(100,200,100)
+    subheading.font.color.rgb = RGBColor(96,167,48)
     subheading2 = doc.styles.add_style('subheading2', h.style.type)
     subheading2.font.size = Pt(14)
-    subheading2.font.color.rgb = RGBColor(100,200,100)
+    subheading2.font.color.rgb = RGBColor(96,167,48)
     small = doc.styles.add_style('small', h.style.type)
     small.font.size = Pt(10)
     small.font.italic = True
@@ -238,24 +240,34 @@ def add_utrustning(doc,js):
     row = table.rows[0].cells
     row[0].text = 'Nr'
     row[0].width = Inches(0.2)
+    row[0].paragraphs[0].paragraph_format.keep_with_next=True
     row[1].text = "Produkt"
+    row[1].paragraphs[0].paragraph_format.keep_with_next=True
     row[2].text = "Tillverkare/artnr"
+    row[2].paragraphs[0].paragraph_format.keep_with_next=True
     row[3].text = "Årtal"
+    row[3].paragraphs[0].paragraph_format.keep_with_next=True
     row[4].text = "Bild nr"
+    row[4].paragraphs[0].paragraph_format.keep_with_next=True
     
     for i, item in enumerate(js["Utrustning"]):
         row = table.add_row()
         row=row.cells
         row[0].text = str(i+1)
+        row[0].paragraphs[0].paragraph_format.keep_with_next=True
         row[0].width = Inches(0.2)
         
         if "Utegymredskap" in item['Items'].keys() and "Utrustning" not in item['Items'].keys(): row[1].text = item['Items']['Utegymredskap']['Value']
         else : row[1].text = item['Items']['Utrustning']['Value']
+        row[1].paragraphs[0].paragraph_format.keep_with_next=True
         if "Tillverkare_x002f_artnr" in item.keys(): row[2].text = item['Items']['Tillverkare_x002f_artnr']
         else: row[2].text = '-'
+        row[2].paragraphs[0].paragraph_format.keep_with_next=True
         if "OData__x00c5_rtal" not in item["Items"].keys(): item['Items']['OData__x00c5_rtal'] = 'Saknas'
         row[3].text = item['Items']['OData__x00c5_rtal']
+        row[3].paragraphs[0].paragraph_format.keep_with_next=True
         row[4].text = "Bild: "+str(i+1)
+        if i != len(js['Utrustning'])-1:row[4].paragraphs[0].paragraph_format.keep_with_next=True
     
     for cell in table.columns[0].cells:
         cell.width = Inches(0.5)
@@ -297,7 +309,7 @@ def add_utrustning(doc,js):
         file = io.BytesIO(base64.b64decode(img))
         file.seek(0)
         file = resize_and_autoorient(file,120,120)
-        p = row[index0].add_paragraph()
+        p = row[index0].paragraphs[0]
         p.add_run().add_picture(file)
         index0 +=1
         if index0 ==3:
@@ -379,8 +391,10 @@ def add_underlag(doc,js):
         table.style.paragraph_format.keep_with_next = True
         row = table.rows[0].cells
         row[0].text = item['Kommentar']
+        row[0].paragraphs[0].paragraph_format.keep_with_next=True
         row[0].style = 'vsmall'
         row[1].text = item['Bed_x00f6_mning']['Value']
+        row[1].paragraphs[0].paragraph_format.keep_with_next=True
         p = doc.add_paragraph()
         p.text = "Enligt SS-EN 1176-1:4.2.8.5"
         p.style = 'small'
@@ -402,8 +416,14 @@ def add_anmärkningar(doc, js):
         h = doc.add_heading('Produkt '+str(i+1)+', '+ utrustning['Utrustning']['Value'], 0)
         h.style= 'subheading'
         h.paragraph_format.keep_with_next = True
+        h.runs[0].bold=True
         
                     # LOOP FÖR ATT LÄGGA TILL BILDER
+        if any(anmärkningar):
+            ph = doc.add_paragraph()
+            ph.text = "Anmärkningar"
+            ph.style = 'subheading2'
+            ph.style.paragraph_format.keep_with_next=True
         for anmärkning in anmärkningar:
             if anmärkning['Items']['{HasAttachments}']:
                 table=doc.add_table(rows=0, cols=4)
@@ -431,7 +451,9 @@ def add_anmärkningar(doc, js):
             table.style.paragraph_format.keep_with_next = True
             row = table.rows[0].cells
             row[0].text = anmärkning['Items']['Kommentar']
+            row[0].paragraphs[0].paragraph_format.keep_with_next=True
             row[1].text = anmärkning['Items']['Bed_x00f6_mning']['Value']
+            row[1].paragraphs[0].paragraph_format.keep_with_next=True
             for cell in table.columns[0].cells:
                 cell.width = Inches(6)
             for cell in table.columns[1].cells:
@@ -442,10 +464,13 @@ def add_anmärkningar(doc, js):
             p1.style = 'small'
             
             # LÄGG TILL MONTERING OVAN OCH UNDER MARK
-       # if 'Montering_ovan_mark' not in utrustning.keys(): utrustning['Montering_ovan_mark'] = '-'
-       # if 'Montering_under_mark' not in utrustning.keys(): utrustning['Montering_under_mark'] = '-'
-        
-        if False:# js['Items']['value'][0]['Typavbesiktning']['Value']=='Installationsbesiktning' and utrustning['Montering_ovan_mark'] and utrustning['Montering_under_mark']:
+        if 'Montering_ovan_mark' not in utrustning.keys(): utrustning['Montering_ovan_mark'] = '-'
+        if 'Montering_under_mark' not in utrustning.keys(): utrustning['Montering_under_mark'] = '-'
+        if 'Montering_ovan_bed' not in utrustning.keys():
+            utrustning['Montering_ovan_bed'] = {'Value':'-'}
+        if 'Montering_under_bed' not in utrustning.keys():
+            utrustning['Montering_under_bed']={'Value':'-'}
+        if js['Items']['value'][0]['Typavbesiktning']['Value']=='Installationsbesiktning':
             ph = doc.add_paragraph()
             ph.text = "Montering ovan mark"
             ph.style = 'subheading2'
@@ -456,7 +481,9 @@ def add_anmärkningar(doc, js):
             table.style.paragraph_format.keep_with_next = True
             row = table.rows[0].cells
             row[0].text = utrustning['Montering_ovan_mark']
-            row[1].text = '-'
+            row[0].paragraphs[0].paragraph_format.keep_with_next=True
+            row[1].text = utrustning['Montering_ovan_bed']['Value']
+            row[1].paragraphs[0].paragraph_format.keep_with_next=True
             for cell in table.columns[0].cells:
                 cell.width = Inches(6)
             for cell in table.columns[1].cells:
@@ -464,6 +491,7 @@ def add_anmärkningar(doc, js):
             p = doc.add_paragraph()
             p.text = "Enligt SS EN 1176-1:6.2.2"
             p.style = 'small'
+            p.paragraph_format.keep_with_next=True
                 
                 
             ph = doc.add_paragraph()
@@ -476,14 +504,16 @@ def add_anmärkningar(doc, js):
             table.style.paragraph_format.keep_with_next = True
             row = table.rows[0].cells
             row[0].text = utrustning['Montering_under_mark']
-            row[1].text = '-'
+            row[0].paragraphs[0].paragraph_format.keep_with_next=True
+            row[1].text = utrustning['Montering_under_bed']['Value']
+            row[1].paragraphs[0].paragraph_format.keep_with_next=True
             for cell in table.columns[0].cells:
                 cell.width = Inches(6)
             for cell in table.columns[1].cells:
                 cell.width = Inches(0.4)
             p = doc.add_paragraph()
             p.text = "Enligt SS EN 1176-1:6.2.2"
-            p.style = 'small'                
+            p.style = 'small'
             
     
 def __add_anmärkningar_deprecated(doc, js):
@@ -693,7 +723,8 @@ def add_brunnar(doc,js):
                     file = io.BytesIO(base64.b64decode(item['Image'][index]['content']))
                     file.seek(0)
                     file = resize_and_autoorient(file,100,100)
-                    p=row[i].add_paragraph()
+                    p=row[i].paragraphs[0]
+                    row[i].paragraphs[0].paragraph_format.keep_with_next=True
                     picture = p.add_run()
                     picture.add_picture(file)
 
@@ -705,7 +736,9 @@ def add_brunnar(doc,js):
         table.style.paragraph_format.keep_with_next=True
         row = table.rows[0].cells
         row[1].text = item['Items']['Anm_x00e4_rkning']
+        row[1].paragraphs[0].paragraph_format.keep_with_next=True
         row[0].text = item['Items']['Status']['Value']
+        row[0].paragraphs[0].paragraph_format.keep_with_next=True
         p = doc.add_paragraph()
         p.text = "Enligt ordningslagen 3 kap 5§"
         p.style = 'small'
