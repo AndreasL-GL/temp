@@ -12,7 +12,7 @@ from Office_helper_functions.Word.form_field import set_checkbox_value, compress
 from Office_helper_functions.Image.Image_operations import resize_and_autoorient
 from functions.Word.add_image_to_zipfile import add_icon_to_word_file
 import base64
-from docx.enum.text import WD_BREAK
+from docx.enum.text import WD_BREAK, WD_PARAGRAPH_ALIGNMENT, WD_UNDERLINE
 from flask import abort
 
 icons = {
@@ -221,6 +221,9 @@ def add_utrustning(doc,js):
     subheading = doc.styles.add_style('subheading', h.style.type)
     subheading.font.size = Pt(16)
     subheading.font.color.rgb = RGBColor(100,200,100)
+    subheading2 = doc.styles.add_style('subheading2', h.style.type)
+    subheading2.font.size = Pt(14)
+    subheading2.font.color.rgb = RGBColor(100,200,100)
     small = doc.styles.add_style('small', h.style.type)
     small.font.size = Pt(10)
     small.font.italic = True
@@ -264,7 +267,7 @@ def add_utrustning(doc,js):
         cell.width = Inches(0.7)
     for cell in table.columns[4].cells:
         cell.width = Inches(0.8)
-    
+    doc.add_page_break()
     hh = doc.add_heading('Besiktningsresultat', 0)
     hh.style = 'Big heading'
     hh.style.paragraph_format.keep_with_next=True
@@ -387,8 +390,103 @@ def add_underlag(doc,js):
             cell.width = Inches(0.4)
     return None
     
-    
 def add_anmärkningar(doc, js):
+    doc.add_paragraph()
+    hh = doc.add_heading('Anmärkningar:', 0)
+    hh.style = 'Big heading'
+    hh.style.paragraph_format.keep_with_next = True
+    for i,utrustning in enumerate(js['Utrustning']):
+        utrustning=utrustning['Items']
+        anmärkningar = [anmärkning for anmärkning in js['Anmärkningar'] if anmärkning['Items']['UtrustningsID'] == utrustning['ID']]
+        #print(utrustning.keys())
+        h = doc.add_heading('Produkt '+str(i+1)+', '+ utrustning['Utrustning']['Value'], 0)
+        h.style= 'subheading'
+        h.paragraph_format.keep_with_next = True
+        
+                    # LOOP FÖR ATT LÄGGA TILL BILDER
+        for anmärkning in anmärkningar:
+            if anmärkning['Items']['{HasAttachments}']:
+                table=doc.add_table(rows=0, cols=4)
+                index = 0
+                table.style.paragraph_format.keep_together = True
+                while index < len(anmärkning['Image']):
+                    row0 = table.add_row()
+                    row =row0.cells
+                    for i in range(0,4):
+                        if index == len(anmärkning['Image']): continue
+                        row[i]
+                        file = io.BytesIO(base64.b64decode(anmärkning['Image'][index]['content']))
+                        file.seek(0)
+                        file = resize_and_autoorient(file,100,100)
+                        p=row[i].add_paragraph()
+                        p.style= 'imgp'
+                        p.style.paragraph_format.keep_with_next=True
+                        run = p.add_run()
+                        picture = run.add_picture(file)
+                        index +=1
+                        
+                        #  LÄGG TILL ANMÄRKNINGAR
+            table = doc.add_table(rows=1, cols=2)
+            table.style = 'Grid Table Light'
+            table.style.paragraph_format.keep_with_next = True
+            row = table.rows[0].cells
+            row[0].text = anmärkning['Items']['Kommentar']
+            row[1].text = anmärkning['Items']['Bed_x00f6_mning']['Value']
+            for cell in table.columns[0].cells:
+                cell.width = Inches(6)
+            for cell in table.columns[1].cells:
+                cell.width = Inches(0.4)
+                # Standard under tabell
+            p1 = doc.add_paragraph()
+            p1.text = anmärkning['Items']['Utrustningstyp']['Value']
+            p1.style = 'small'
+            
+            # LÄGG TILL MONTERING OVAN OCH UNDER MARK
+       # if 'Montering_ovan_mark' not in utrustning.keys(): utrustning['Montering_ovan_mark'] = '-'
+       # if 'Montering_under_mark' not in utrustning.keys(): utrustning['Montering_under_mark'] = '-'
+        
+        if False:# js['Items']['value'][0]['Typavbesiktning']['Value']=='Installationsbesiktning' and utrustning['Montering_ovan_mark'] and utrustning['Montering_under_mark']:
+            ph = doc.add_paragraph()
+            ph.text = "Montering ovan mark"
+            ph.style = 'subheading2'
+            ph.style.paragraph_format.keep_with_next=True
+            
+            table = doc.add_table(rows=1, cols=2)
+            table.style = 'Grid Table Light'
+            table.style.paragraph_format.keep_with_next = True
+            row = table.rows[0].cells
+            row[0].text = utrustning['Montering_ovan_mark']
+            row[1].text = '-'
+            for cell in table.columns[0].cells:
+                cell.width = Inches(6)
+            for cell in table.columns[1].cells:
+                cell.width = Inches(0.4)
+            p = doc.add_paragraph()
+            p.text = "Enligt SS EN 1176-1:6.2.2"
+            p.style = 'small'
+                
+                
+            ph = doc.add_paragraph()
+            ph.text = "Montering under mark"
+            ph.style = 'subheading2'
+            ph.style.paragraph_format.keep_with_next=True
+            
+            table = doc.add_table(rows=1, cols=2)
+            table.style = 'Grid Table Light'
+            table.style.paragraph_format.keep_with_next = True
+            row = table.rows[0].cells
+            row[0].text = utrustning['Montering_under_mark']
+            row[1].text = '-'
+            for cell in table.columns[0].cells:
+                cell.width = Inches(6)
+            for cell in table.columns[1].cells:
+                cell.width = Inches(0.4)
+            p = doc.add_paragraph()
+            p.text = "Enligt SS EN 1176-1:6.2.2"
+            p.style = 'small'                
+            
+    
+def __add_anmärkningar_deprecated(doc, js):
     doc.add_paragraph()
     hh = doc.add_heading('Anmärkningar:', 0)
     hh.style = 'Big heading'
@@ -396,19 +494,24 @@ def add_anmärkningar(doc, js):
     #images = [img['Image'][0] for img in js['Anmärkningar']]
 
     for i, item in enumerate(js['Anmärkningar']):
-        utrustningslista = [(utrustning['Items']['Montering_under_mark'], utrustning['Items']['Montering_ovan_mark']) for utrustning in js['Utrustning'] if utrustning['Items']['ID'] == item['Items']['UtrustningsID'] and 'Montering ovan Mark' in utrustning['Items'].keys()]
+       
+        utrustningslista = [(utrustning['Items']['Montering_under_mark'], utrustning['Items']['Montering_ovan_mark']) for utrustning in js['Utrustning'] if utrustning['Items']['ID'] == item['Items']['UtrustningsID'] and 'Montering_ovan_mark' in utrustning['Items'].keys()]
+        print(utrustningslista)
         if any(utrustningslista):
             montering_under_mark, montering_ovan_mark = utrustningslista[0]
-        item['montering_under_mark'] = montering_under_mark
-        item['montering_ovan_mark'] = montering_ovan_mark
+            item['montering_under_mark'] = montering_under_mark
+            item['montering_ovan_mark'] = montering_ovan_mark
+            
         if 'Utrustningstyp0' or 'Utrustningstyp' in item['Items'].keys(): 
             utrustning = [items['Items']['Utrustning']['Value'] for items in js['Utrustning'] if items['Items']['ID'] == item['Items']['UtrustningsID']][0]
             h = doc.add_heading('Produkt '+str(i+1)+', '+ utrustning, 0)
-            
-        else: h = doc.add_heading('Produkt '+str(i+1)+', '+'Gymutrustning')
+            h.style= 'subheading'
+            h.paragraph_format.keep_with_next = True
+        else: 
+            h = doc.add_heading('Produkt '+str(i+1)+', '+'Gymutrustning')
+            h.style= 'subheading'
+            h.paragraph_format.keep_with_next = True
         
-        h.style= 'subheading'
-        h.paragraph_format.keep_with_next = True
         if item['Items']['{HasAttachments}']:
             table=doc.add_table(rows=0, cols=4)
             index = 0
@@ -429,13 +532,15 @@ def add_anmärkningar(doc, js):
                     picture = run.add_picture(file)
                     index +=1
                     
+                    
         
         table = doc.add_table(rows=1, cols=2)
         table.style = 'Grid Table Light'
         table.style.paragraph_format.keep_with_next = True
         row = table.rows[0].cells
-        row[0].add_paragraph().text = item['Items']['Kommentar']
-        row[1].add_paragraph().text = item['Items']['Bed_x00f6_mning']['Value']
+        if "Kommentar" not in item['Items'].keys():item['Items']['Kommentar'] = '-'
+        row[0].text = item['Items']['Kommentar']
+        row[1].text = item['Items']['Bed_x00f6_mning']['Value']
         for cell in table.columns[0].cells:
             cell.width = Inches(6)
         for cell in table.columns[1].cells:
@@ -451,35 +556,15 @@ def add_anmärkningar(doc, js):
         if any(utrustningslista):
             ph = doc.add_paragraph()
             ph.text = "Montering ovan mark"
-            ph.style = 'subheading'
+            ph.style = 'subheading2'
             ph.style.paragraph_format.keep_with_next=True
             
             table = doc.add_table(rows=1, cols=2)
             table.style = 'Grid Table Light'
             table.style.paragraph_format.keep_with_next = True
             row = table.rows[0].cells
-            row[0].add_paragraph().text = montering_ovan_mark
-            row[1].add_paragraph().text = '-'
-            for cell in table.columns[0].cells:
-                cell.width = Inches(6)
-            for cell in table.columns[1].cells:
-                cell.width = Inches(0.4)
-            p = doc.add_paragraph()
-            p.text = "Enligt SS EN 1176-1:6.2.2 "
-            p.style = 'small'
-                
-                
-            ph = doc.add_paragraph()
-            ph.text = "Montering under mark"
-            ph.style = 'subheading'
-            ph.style.paragraph_format.keep_with_next=True
-            
-            table = doc.add_table(rows=1, cols=2)
-            table.style = 'Grid Table Light'
-            table.style.paragraph_format.keep_with_next = True
-            row = table.rows[0].cells
-            row[0].add_paragraph().text = montering_under_mark
-            row[1].add_paragraph().text = '-'
+            row[0].text = montering_ovan_mark
+            row[1].text = '-'
             for cell in table.columns[0].cells:
                 cell.width = Inches(6)
             for cell in table.columns[1].cells:
@@ -487,6 +572,28 @@ def add_anmärkningar(doc, js):
             p = doc.add_paragraph()
             p.text = "Enligt SS EN 1176-1:6.2.2"
             p.style = 'small'
+                
+                
+            ph = doc.add_paragraph()
+            ph.text = "Montering under mark"
+            ph.style = 'subheading2'
+            ph.style.paragraph_format.keep_with_next=True
+            
+            table = doc.add_table(rows=1, cols=2)
+            table.style = 'Grid Table Light'
+            table.style.paragraph_format.keep_with_next = True
+            row = table.rows[0].cells
+            row[0].text = montering_under_mark
+            row[1].text = '-'
+            for cell in table.columns[0].cells:
+                cell.width = Inches(6)
+            for cell in table.columns[1].cells:
+                cell.width = Inches(0.4)
+            p = doc.add_paragraph()
+            p.text = "Enligt SS EN 1176-1:6.2.2"
+            p.style = 'small'
+
+            
             
         # row0 = table.rows[0].cells
         # h = doc.add_heading('Produkt '+str(i+1)+', '+ [item['Items']['Utrustningstyp0'] if 'Utrustningstyp0' in item['Items'].keys() else 'Gymredskap'][0], 0)
@@ -555,6 +662,7 @@ def add_grindar(doc, js):
         table.style = 'Grid Table Light'
         table.style.paragraph_format.keep_with_next=True
         row = table.rows[0].cells
+        if "Kommentar" not in item['Items'].keys():item['Items']['Kommentar'] = '-'
         row[0].text = item['Items']['Kommentar']
         row[1].text = item['Items']['Bed_x00f6_mning']['Value']
         p = doc.add_paragraph()
