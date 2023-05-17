@@ -97,12 +97,16 @@ def populate_template(js1, certifikatjs, js, trigger):
     
     if js1["Certnr"].lower() == 'saknas' and js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Fitness mall ej cert.docx'))
+        print("1")
     elif js1["Certnr"].lower() != 'saknas' and js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Fitness mall cert.docx'))
+        print("2")
     elif js1["Certnr"].lower() != 'saknas' and not js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Lekplatsbesiktning mall cert.docx'))
+        print("3")
     elif js1["Certnr"].lower() == 'saknas' and not js1['Fitnessbesiktning']:
         doc = mailmerge.MailMerge(os.path.join(os.path.dirname(__file__), 'Lekplatsbesiktning mall ej cert.docx'))
+        print("4")
  
 
     js1["H_x00e4_nvisningsskylt"] = "Ja" if js1["H_x00e4_nvisningsskylt"]==True else "Nej"
@@ -303,7 +307,7 @@ def add_utrustning(doc,js):
     index0 = 0
     row = table.add_row().cells
     for img, index in imagedict.items():
-        pt = row[index0].add_paragraph()
+        pt = row[index0].paragraphs[0]
 
         pt.style = 'Small heading'
 
@@ -312,7 +316,7 @@ def add_utrustning(doc,js):
         file = io.BytesIO(base64.b64decode(img))
         file.seek(0)
         file = resize_and_autoorient(file,120,120)
-        p = row[index0].paragraphs[0]
+        p = row[index0].add_paragraph()
         p.add_run().add_picture(file)
         index0 +=1
         if index0 ==3:
@@ -322,7 +326,7 @@ def add_utrustning(doc,js):
         
         for i, item in enumerate(js['Utrustning']):
             if "Utegymredskap" in item['Items'].keys() and "Utrustning" not in item['Items'].keys(): 
-                print("Hello")
+
                 Produkt = item['Items']['Utegymredskap']['Value']
                 item['Items']['Utrustning'] = {'Value':item['Items']['Utegymredskap']}
             elif 'Utrustning' in item['Items'].keys(): 
@@ -455,7 +459,6 @@ def add_anmärkningar(doc, js):
         #     ph.style = 'subheading2'
         #     ph.style.paragraph_format.keep_with_next=True
         for anmärkning in anmärkningar:
-            print("Hello")
             if anmärkning['Items']['{HasAttachments}']:
                 table=doc.add_table(rows=0, cols=4)
                 index = 0
@@ -862,7 +865,7 @@ def run_functions(js):
     
     #file = compress_word_file(file.getvalue())
     filename="Protokoll_"+str(js1['ID'])+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum']
-    if __name__=='__main__': return doc
+    if __name__=='__main__': return doc, filename
     return {"content": base64.b64encode(file.getvalue()).decode('utf-8'), "filename": filename}
 
 
@@ -880,8 +883,8 @@ if __name__ == '__main__':
                 print(item)
                 with open(filename,'r', encoding="utf-8") as f:
                     js = json.load(f)
-                    doc = run_functions(js)
-                doc.save(os.path.join(destpath,item.split('.')[0]+'.docx'))
+                    doc,filename = run_functions(js)
+                doc.save(os.path.join(destpath,filename+'.docx'))
                 
     if test_one:
         with open(os.path.join(os.path.dirname(__file__), 'tt.json'), encoding='utf-8') as f:
