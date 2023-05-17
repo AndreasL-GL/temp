@@ -281,7 +281,6 @@ def add_utrustning(doc,js):
         cell.width = Inches(0.7)
     for cell in table.columns[4].cells:
         cell.width = Inches(0.8)
-    doc.add_page_break()
     hh = doc.add_heading('Besiktningsresultat', 0)
     hh.style = 'Big heading'
     hh.style.paragraph_format.keep_with_next=True
@@ -326,7 +325,6 @@ def add_utrustning(doc,js):
                 item['Items']['Utrustning'] = {'Value':item['Items']['Utegymredskap']}
             elif 'Utrustning' in item['Items'].keys(): 
                 Produkt = item['Items']['Utrustning']['Value']
-                print("HellO")
             else: 
                 Produkt = 'saknas'
                 item['Items']['Utrustning'] = {'Value':'saknas'}
@@ -433,12 +431,14 @@ def add_anmärkningar(doc, js):
         h.runs[0].bold=True
         
                     # LOOP FÖR ATT LÄGGA TILL BILDER
+        print(any(anmärkningar))
         if any(anmärkningar):
             ph = doc.add_paragraph()
             ph.text = "Anmärkningar"
             ph.style = 'subheading2'
             ph.style.paragraph_format.keep_with_next=True
         for anmärkning in anmärkningar:
+            print("Hello")
             if anmärkning['Items']['{HasAttachments}']:
                 table=doc.add_table(rows=0, cols=4)
                 index = 0
@@ -453,6 +453,7 @@ def add_anmärkningar(doc, js):
                         file.seek(0)
                         file = resize_and_autoorient(file,100,100)
                         p=row[i].add_paragraph()
+                        row[i].paragraphs[0].style.paragraph_format.keep_with_next=True
                         p.style= 'imgp'
                         p.style.paragraph_format.keep_with_next=True
                         run = p.add_run()
@@ -476,59 +477,76 @@ def add_anmärkningar(doc, js):
             p1 = doc.add_paragraph()
             p1.text = anmärkning['Items']['Utrustningstyp']['Value']
             p1.style = 'small'
-            print("ANMÄRKNING HÄR")
-        if True: return None
+        if not any(anmärkningar):
+            table = doc.add_table(rows=1, cols=2)
+            table.style = 'Grid Table Light'
+            table.style.paragraph_format.keep_with_next = True
+            row = table.rows[0].cells
+            row[0].text = "Inga anmärkningar funna vid besiktningstillfället"
+            row[0].paragraphs[0].paragraph_format.keep_with_next=True
+            row[1].text = "-"
+            row[1].paragraphs[0].paragraph_format.keep_with_next=True
+            for cell in table.columns[0].cells:
+                cell.width = Inches(6)
+            for cell in table.columns[1].cells:
+                cell.width = Inches(0.4)
+                # Standard under tabell
+            p1 = doc.add_paragraph()
+            p1.text = "SS-EN 1176-1177 alt 16630"
+            p1.style = 'small'
+            
             # LÄGG TILL MONTERING OVAN OCH UNDER MARK
-        if 'Montering_ovan_mark' not in utrustning.keys(): utrustning['Montering_ovan_mark'] = '-'
-        if 'Montering_under_mark' not in utrustning.keys(): utrustning['Montering_under_mark'] = '-'
-        if 'Montering_ovan_bed' not in utrustning.keys():
-            utrustning['Montering_ovan_bed'] = {'Value':'-'}
-        if 'Montering_under_bed' not in utrustning.keys():
-            utrustning['Montering_under_bed']={'Value':'-'}
-        if js['Items']['value'][0]['Typavbesiktning']['Value']=='Installationsbesiktning':
-            ph = doc.add_paragraph()
-            ph.text = "Montering ovan mark"
-            ph.style = 'subheading2'
-            ph.style.paragraph_format.keep_with_next=True
-            
-            table = doc.add_table(rows=1, cols=2)
-            table.style = 'Grid Table Light'
-            table.style.paragraph_format.keep_with_next = True
-            row = table.rows[0].cells
-            row[0].text = utrustning['Montering_ovan_mark']
-            row[0].paragraphs[0].paragraph_format.keep_with_next=True
-            row[1].text = utrustning['Montering_ovan_bed']['Value']
-            row[1].paragraphs[0].paragraph_format.keep_with_next=True
-            for cell in table.columns[0].cells:
-                cell.width = Inches(6)
-            for cell in table.columns[1].cells:
-                cell.width = Inches(0.4)
-            p = doc.add_paragraph()
-            p.text = "Enligt SS EN 1176-1:6.2.2"
-            p.style = 'small'
-            p.paragraph_format.keep_with_next=True
+        if True:
+            if 'Montering_ovan_mark' not in utrustning.keys(): utrustning['Montering_ovan_mark'] = '-'
+            if 'Montering_under_mark' not in utrustning.keys(): utrustning['Montering_under_mark'] = '-'
+            if 'Montering_ovan_bed' not in utrustning.keys():
+                utrustning['Montering_ovan_bed'] = {'Value':'-'}
+            if 'Montering_under_bed' not in utrustning.keys():
+                utrustning['Montering_under_bed']={'Value':'-'}
+            if js['Items']['value'][0]['Typavbesiktning']['Value']=='Installationsbesiktning':
+                ph = doc.add_paragraph()
+                ph.text = "Montering ovan mark"
+                ph.style = 'subheading2'
+                ph.style.paragraph_format.keep_with_next=True
                 
+                table = doc.add_table(rows=1, cols=2)
+                table.style = 'Grid Table Light'
+                table.style.paragraph_format.keep_with_next = True
+                row = table.rows[0].cells
+                row[0].text = utrustning['Montering_ovan_mark']
+                row[0].paragraphs[0].paragraph_format.keep_with_next=True
+                row[1].text = utrustning['Montering_ovan_bed']['Value']
+                row[1].paragraphs[0].paragraph_format.keep_with_next=True
+                for cell in table.columns[0].cells:
+                    cell.width = Inches(6)
+                for cell in table.columns[1].cells:
+                    cell.width = Inches(0.4)
+                p = doc.add_paragraph()
+                p.text = "Enligt SS EN 1176-1:6.2.2"
+                p.style = 'small'
+                p.paragraph_format.keep_with_next=True
+                    
+                    
+                ph = doc.add_paragraph()
+                ph.text = "Montering under mark"
+                ph.style = 'subheading2'
+                ph.style.paragraph_format.keep_with_next=True
                 
-            ph = doc.add_paragraph()
-            ph.text = "Montering under mark"
-            ph.style = 'subheading2'
-            ph.style.paragraph_format.keep_with_next=True
-            
-            table = doc.add_table(rows=1, cols=2)
-            table.style = 'Grid Table Light'
-            table.style.paragraph_format.keep_with_next = True
-            row = table.rows[0].cells
-            row[0].text = utrustning['Montering_under_mark']
-            row[0].paragraphs[0].paragraph_format.keep_with_next=True
-            row[1].text = utrustning['Montering_under_bed']['Value']
-            row[1].paragraphs[0].paragraph_format.keep_with_next=True
-            for cell in table.columns[0].cells:
-                cell.width = Inches(6)
-            for cell in table.columns[1].cells:
-                cell.width = Inches(0.4)
-            p = doc.add_paragraph()
-            p.text = "Enligt SS EN 1176-1:6.2.2"
-            p.style = 'small'
+                table = doc.add_table(rows=1, cols=2)
+                table.style = 'Grid Table Light'
+                table.style.paragraph_format.keep_with_next = True
+                row = table.rows[0].cells
+                row[0].text = utrustning['Montering_under_mark']
+                row[0].paragraphs[0].paragraph_format.keep_with_next=True
+                row[1].text = utrustning['Montering_under_bed']['Value']
+                row[1].paragraphs[0].paragraph_format.keep_with_next=True
+                for cell in table.columns[0].cells:
+                    cell.width = Inches(6)
+                for cell in table.columns[1].cells:
+                    cell.width = Inches(0.4)
+                p = doc.add_paragraph()
+                p.text = "Enligt SS EN 1176-1:6.2.2"
+                p.style = 'small'
             
     
 def __add_anmärkningar_deprecated(doc, js):
@@ -539,9 +557,8 @@ def __add_anmärkningar_deprecated(doc, js):
     #images = [img['Image'][0] for img in js['Anmärkningar']]
 
     for i, item in enumerate(js['Anmärkningar']):
-       
+
         utrustningslista = [(utrustning['Items']['Montering_under_mark'], utrustning['Items']['Montering_ovan_mark']) for utrustning in js['Utrustning'] if utrustning['Items']['ID'] == item['Items']['UtrustningsID'] and 'Montering_ovan_mark' in utrustning['Items'].keys()]
-        print(utrustningslista)
         if False: #(utrustningslista):
             montering_under_mark, montering_ovan_mark = utrustningslista[0]
             item['montering_under_mark'] = montering_under_mark
@@ -837,16 +854,18 @@ if __name__ == '__main__':
     # with open(os.path.join(os.path.dirname(__file__),'sample.json'),'r', encoding="utf-8") as f:
     #     js = json.load(f)
     # doc = create_protocol('Funktionskontrolllekplatsdemo',"Lista_lekplats_besiktningsprotokoll",js)
-    test_one=True
+    test_one=False
     if not test_one:
         jsonpath = os.path.join(os.path.dirname(__file__),'Lekplatsprotokoll_json_filer')
         destpath = os.path.join(os.path.dirname(__file__), 'Testing_word_filer')
         for item in os.listdir(jsonpath):
-            filename = os.path.join(jsonpath,item)
-            with open(filename,'r', encoding="utf-8") as f:
-                js = json.load(f)
-                doc = run_functions(js)
-            doc.save(os.path.join(destpath,item.split('.')[0]+'.docx'))
+            if '' in item:    
+                filename = os.path.join(jsonpath,item)
+                print(item)
+                with open(filename,'r', encoding="utf-8") as f:
+                    js = json.load(f)
+                    doc = run_functions(js)
+                doc.save(os.path.join(destpath,item.split('.')[0]+'.docx'))
     if test_one:
         with open(os.path.join(os.path.dirname(__file__), 'tt.json'), encoding='utf-8') as f:
             js = json.load(f)
