@@ -198,7 +198,7 @@ def populate_template(js1, certifikatjs, js, trigger):
             'Status':{'Value':'Ej kontrollerade.'}
             }, 'Images':''}]
         add_brunnar(doc,js)
-    doc.save(os.path.join(os.path.dirname(__file__), 'steg_1.docx'), )
+    #doc.save(os.path.join(os.path.dirname(__file__), 'steg_1.docx'), )
     return doc
 
 
@@ -264,7 +264,7 @@ def add_utrustning(doc,js):
             row[2].text = item['Items']['Tillverkare_x002f_artnr']
         else: row[2].text = '-'
         row[2].paragraphs[0].paragraph_format.keep_with_next=True
-        print(item['Items'].keys())
+
         if "OData__x00c5_rtal" not in item["Items"].keys(): item['Items']['OData__x00c5_rtal'] = 'Saknas'
         row[3].text = item['Items']['OData__x00c5_rtal']
         row[3].paragraphs[0].paragraph_format.keep_with_next=True
@@ -320,8 +320,17 @@ def add_utrustning(doc,js):
     if js['Items']['value'][0]['Typavbesiktning']['Value'] == 'Installationsbesiktning':
         
         for i, item in enumerate(js['Utrustning']):
-            if "Utegymredskap" in item['Items'].keys() and "Utrustning" not in item['Items'].keys(): Produkt = item['Items']['Utegymredskap']['Value']
-            else : Produkt = item['Items']['Utrustning']['Value']
+            if "Utegymredskap" in item['Items'].keys() and "Utrustning" not in item['Items'].keys(): 
+                print("Hello")
+                Produkt = item['Items']['Utegymredskap']['Value']
+                item['Items']['Utrustning'] = {'Value':item['Items']['Utegymredskap']}
+            elif 'Utrustning' in item['Items'].keys(): 
+                Produkt = item['Items']['Utrustning']['Value']
+                print("HellO")
+            else: 
+                Produkt = 'saknas'
+                item['Items']['Utrustning'] = {'Value':'saknas'}
+                
             
 
             # table = doc.add_table(rows=1, cols=5)
@@ -365,6 +374,7 @@ def add_utrustning(doc,js):
     return None
 
 def add_underlag(doc,js):
+    doc.add_page_break()
     doc.add_paragraph()
     hh = doc.add_heading('Stötdämpande underlag:', 0)
     hh.style = 'Big heading'
@@ -415,7 +425,8 @@ def add_anmärkningar(doc, js):
         utrustning=utrustning['Items']
         anmärkningar = [anmärkning for anmärkning in js['Anmärkningar'] if anmärkning['Items']['UtrustningsID'] == utrustning['ID']]
         #print(utrustning.keys())
-        if 'Utrustning' not in utrustning.keys(): utrustning['Utrustning'] =  {'Value':'Saknas'}
+        if 'Utrustning' not in utrustning.keys():
+            utrustning['Utrustning'] =  {'Value':utrustning['Utegymredskap']['Value']}
         h = doc.add_heading('Produkt '+str(i+1)+', '+ utrustning['Utrustning']['Value'], 0)
         h.style= 'subheading'
         h.paragraph_format.keep_with_next = True
@@ -465,6 +476,7 @@ def add_anmärkningar(doc, js):
             p1 = doc.add_paragraph()
             p1.text = anmärkning['Items']['Utrustningstyp']['Value']
             p1.style = 'small'
+            print("ANMÄRKNING HÄR")
         if True: return None
             # LÄGG TILL MONTERING OVAN OCH UNDER MARK
         if 'Montering_ovan_mark' not in utrustning.keys(): utrustning['Montering_ovan_mark'] = '-'
@@ -817,6 +829,7 @@ def run_functions(js):
     
     #file = compress_word_file(file.getvalue())
     filename="Protokoll_"+str(js1['ID'])+'_'+js1['Title']+'_'+js1['Adress']+'_'+js1['Datum']
+    if __name__=='__main__': return doc
     return {"content": base64.b64encode(file.getvalue()).decode('utf-8'), "filename": filename}
 
 
@@ -824,10 +837,21 @@ if __name__ == '__main__':
     # with open(os.path.join(os.path.dirname(__file__),'sample.json'),'r', encoding="utf-8") as f:
     #     js = json.load(f)
     # doc = create_protocol('Funktionskontrolllekplatsdemo',"Lista_lekplats_besiktningsprotokoll",js)
-    
-    with open(os.path.join(os.path.dirname(__file__),'tt.json'),'r', encoding="utf-8") as f:
-        js = json.load(f)
-        run_functions(js)
+    test_one=True
+    if not test_one:
+        jsonpath = os.path.join(os.path.dirname(__file__),'Lekplatsprotokoll_json_filer')
+        destpath = os.path.join(os.path.dirname(__file__), 'Testing_word_filer')
+        for item in os.listdir(jsonpath):
+            filename = os.path.join(jsonpath,item)
+            with open(filename,'r', encoding="utf-8") as f:
+                js = json.load(f)
+                doc = run_functions(js)
+            doc.save(os.path.join(destpath,item.split('.')[0]+'.docx'))
+    if test_one:
+        with open(os.path.join(os.path.dirname(__file__), 'tt.json'), encoding='utf-8') as f:
+            js = json.load(f)
+            doc = run_functions(js)
+            doc.save(os.path.join(os.path.dirname(__file__),'steg_1.docx'))
         
 
     ### TODO:
