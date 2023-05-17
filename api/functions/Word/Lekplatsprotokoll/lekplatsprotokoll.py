@@ -120,7 +120,7 @@ def populate_template(js1, certifikatjs, js, trigger):
     else: bolag = js1['Bolag']
     icon_file = requests.get(icons[bolag], headers=get_sharepoint_access_headers_through_client_id()).content
     ### TYPE CHANGE: type(doc) = docx.Document object from here.
-    doc = change_icon_in_header(doc, icon_file, "word/media/image1.png")
+    doc = change_icon_in_header(doc, js1, icon_file, imagepath="word/media/image1.png")
     if js1['Typavbesiktning']['Value'] == "Installationsbesiktning":
         file = io.BytesIO()
         doc.save(file)
@@ -753,7 +753,7 @@ def add_brunnar(doc,js):
 
 
 
-def change_icon_in_header(doc, icon_file, imagepath):
+def change_icon_in_header(doc, js1, icon_file, imagepath):
     """Changes the icon in the header of a word file by replacing a pre-formatted placeholder image."""
     file_content = io.BytesIO(icon_file)
     file_content.seek(0)
@@ -766,7 +766,9 @@ def change_icon_in_header(doc, icon_file, imagepath):
         doc.write(docbyte)
     else: doc.save(docbyte)
     docbyte.seek(0)
-    doc = add_icon_to_word_file(docbyte.read(), icon_file=fb.read(), imagepath=imagepath)
+    if js1["Certnr"].lower() != 'saknas' and js1['Fitnessbesiktning']:
+        doc = add_icon_to_word_file(docbyte.read(), icon_file=fb.read(), imagepath="word/media/image2.png")
+    else: doc = add_icon_to_word_file(docbyte.read(), icon_file=fb.read(), imagepath=imagepath)
     doc = docx.Document(doc)
     return doc
 
