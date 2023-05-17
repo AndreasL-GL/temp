@@ -260,9 +260,11 @@ def add_utrustning(doc,js):
         if "Utegymredskap" in item['Items'].keys() and "Utrustning" not in item['Items'].keys(): row[1].text = item['Items']['Utegymredskap']['Value']
         else : row[1].text = item['Items']['Utrustning']['Value']
         row[1].paragraphs[0].paragraph_format.keep_with_next=True
-        if "Tillverkare_x002f_artnr" in item.keys(): row[2].text = item['Items']['Tillverkare_x002f_artnr']
+        if "Tillverkare_x002f_artnr" in item['Items'].keys(): 
+            row[2].text = item['Items']['Tillverkare_x002f_artnr']
         else: row[2].text = '-'
         row[2].paragraphs[0].paragraph_format.keep_with_next=True
+        print(item['Items'].keys())
         if "OData__x00c5_rtal" not in item["Items"].keys(): item['Items']['OData__x00c5_rtal'] = 'Saknas'
         row[3].text = item['Items']['OData__x00c5_rtal']
         row[3].paragraphs[0].paragraph_format.keep_with_next=True
@@ -413,6 +415,7 @@ def add_anmärkningar(doc, js):
         utrustning=utrustning['Items']
         anmärkningar = [anmärkning for anmärkning in js['Anmärkningar'] if anmärkning['Items']['UtrustningsID'] == utrustning['ID']]
         #print(utrustning.keys())
+        if 'Utrustning' not in utrustning.keys(): utrustning['Utrustning'] =  {'Value':'Saknas'}
         h = doc.add_heading('Produkt '+str(i+1)+', '+ utrustning['Utrustning']['Value'], 0)
         h.style= 'subheading'
         h.paragraph_format.keep_with_next = True
@@ -462,7 +465,7 @@ def add_anmärkningar(doc, js):
             p1 = doc.add_paragraph()
             p1.text = anmärkning['Items']['Utrustningstyp']['Value']
             p1.style = 'small'
-            
+        if True: return None
             # LÄGG TILL MONTERING OVAN OCH UNDER MARK
         if 'Montering_ovan_mark' not in utrustning.keys(): utrustning['Montering_ovan_mark'] = '-'
         if 'Montering_under_mark' not in utrustning.keys(): utrustning['Montering_under_mark'] = '-'
