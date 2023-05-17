@@ -178,10 +178,12 @@ def populate_template(js1, certifikatjs, js, trigger):
     imgp = doc.styles.add_style('imgp', st)
     imgp.font.size = Pt(11)
     imgp.font.color.rgb = RGBColor(96,167,48)
-    
+
     doc.add_page_break()
+
     add_översiktsbild(doc,js)
     add_utrustning(doc,js)
+
     if len(js['Utrustning']) >7 and len(js['Utrustning']) <= 12: doc.add_page_break()
     # add_page_break(doc)
     add_anmärkningar(doc,js)
@@ -379,7 +381,22 @@ def add_underlag(doc,js):
     #images = [img['Image'][0] for img in js['Anmärkningar']]
     hh.paragraph_format.keep_with_next=True
     if not any(js['Underlag']):
-        p = doc.add_paragraph('Inga kommentarer gällande underlag')
+        table = doc.add_table(rows=1, cols=2)
+        table.style = 'Grid Table Light'
+        table.style.paragraph_format.keep_with_next = True
+        row = table.rows[0].cells
+        row[0].text = 'Inga kommentarer gällande underlag'
+        row[0].paragraphs[0].paragraph_format.keep_with_next=True
+        row[0].style = 'vsmall'
+        row[1].text = '-'
+        row[1].paragraphs[0].paragraph_format.keep_with_next=True
+        p = doc.add_paragraph()
+        p.text = "Enligt SS-EN 1176-1:4.2.8.5"
+        p.style = 'small'
+        for cell in table.columns[0].cells:
+            cell.width = Inches(6)
+        for cell in table.columns[1].cells:
+            cell.width = Inches(0.4)
         return None
     count=0
     for i, item in enumerate(js['Underlag']):
@@ -415,10 +432,10 @@ def add_underlag(doc,js):
     return None
     
 def add_anmärkningar(doc, js):
-    doc.add_paragraph()
+    doc.add_page_break()
     hh = doc.add_heading('Anmärkningar:', 0)
     hh.style = 'Big heading'
-    hh.style.paragraph_format.keep_with_next = True
+    hh.paragraph_format.keep_with_next = True
     for i,utrustning in enumerate(js['Utrustning']):
         utrustning=utrustning['Items']
         anmärkningar = [anmärkning for anmärkning in js['Anmärkningar'] if anmärkning['Items']['UtrustningsID'] == utrustning['ID']]
@@ -431,12 +448,12 @@ def add_anmärkningar(doc, js):
         h.runs[0].bold=True
         
                     # LOOP FÖR ATT LÄGGA TILL BILDER
-        print(any(anmärkningar))
-        if any(anmärkningar):
-            ph = doc.add_paragraph()
-            ph.text = "Anmärkningar"
-            ph.style = 'subheading2'
-            ph.style.paragraph_format.keep_with_next=True
+        # print(any(anmärkningar))
+        # if any(anmärkningar):
+        #     ph = doc.add_paragraph()
+        #     ph.text = "Anmärkningar"
+        #     ph.style = 'subheading2'
+        #     ph.style.paragraph_format.keep_with_next=True
         for anmärkning in anmärkningar:
             print("Hello")
             if anmärkning['Items']['{HasAttachments}']:
@@ -452,10 +469,9 @@ def add_anmärkningar(doc, js):
                         file = io.BytesIO(base64.b64decode(anmärkning['Image'][index]['content']))
                         file.seek(0)
                         file = resize_and_autoorient(file,100,100)
-                        p=row[i].add_paragraph()
-                        row[i].paragraphs[0].style.paragraph_format.keep_with_next=True
+                        p=row[i].paragraphs[0]
                         p.style= 'imgp'
-                        p.style.paragraph_format.keep_with_next=True
+                        p.paragraph_format.keep_with_next=True
                         run = p.add_run()
                         picture = run.add_picture(file)
                         index +=1
@@ -496,7 +512,7 @@ def add_anmärkningar(doc, js):
             p1.style = 'small'
             
             # LÄGG TILL MONTERING OVAN OCH UNDER MARK
-        if True:
+        if False:
             if 'Montering_ovan_mark' not in utrustning.keys(): utrustning['Montering_ovan_mark'] = '-'
             if 'Montering_under_mark' not in utrustning.keys(): utrustning['Montering_under_mark'] = '-'
             if 'Montering_ovan_bed' not in utrustning.keys():
@@ -866,6 +882,7 @@ if __name__ == '__main__':
                     js = json.load(f)
                     doc = run_functions(js)
                 doc.save(os.path.join(destpath,item.split('.')[0]+'.docx'))
+                
     if test_one:
         with open(os.path.join(os.path.dirname(__file__), 'tt.json'), encoding='utf-8') as f:
             js = json.load(f)
