@@ -5,7 +5,7 @@ import os
 from functions.SQL_commands import Sql
 from image_api_blueprints import image_resize
 from flow_tools_blueprints import flow_starting_page, get_sharepoint_columns_, get_kontrollmoment
-from excel_tools_blueprints import excel_dagbok
+from excel_tools_blueprints import excel_dagbok, fakturaextraktion
 from blueprints_word import word_path
 config = configparser.ConfigParser()
 config.read(os.path.join(os.path.join(os.path.dirname(__file__),'config'),"config.ini"))
@@ -18,6 +18,7 @@ app.register_blueprint(flow_starting_page)
 app.register_blueprint(get_sharepoint_columns_)
 app.register_blueprint(get_kontrollmoment)
 app.register_blueprint(excel_dagbok)
+app.register_blueprint(fakturaextraktion)
 
 @app.route("/", methods=['GET', 'POST'])
 def Home():

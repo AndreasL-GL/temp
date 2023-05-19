@@ -511,11 +511,11 @@ def add_anmärkningar(doc, js):
                 cell.width = Inches(0.4)
                 # Standard under tabell
             p1 = doc.add_paragraph()
-            p1.text = "SS-EN 1176-1177 alt 16630"
+            p1.text = "Saknas"
             p1.style = 'small'
             
             # LÄGG TILL MONTERING OVAN OCH UNDER MARK
-        if False:
+        if True:
             if 'Montering_ovan_mark' not in utrustning.keys(): utrustning['Montering_ovan_mark'] = '-'
             if 'Montering_under_mark' not in utrustning.keys(): utrustning['Montering_under_mark'] = '-'
             if 'Montering_ovan_bed' not in utrustning.keys():
@@ -880,7 +880,7 @@ if __name__ == '__main__':
         for item in os.listdir(jsonpath):
             if '' in item:    
                 filename = os.path.join(jsonpath,item)
-                print(item)
+                print(filename)
                 with open(filename,'r', encoding="utf-8") as f:
                     js = json.load(f)
                     doc,filename = run_functions(js)

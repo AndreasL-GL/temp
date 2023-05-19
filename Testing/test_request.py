@@ -73,4 +73,14 @@ def test_Word_functions():
     file_content.seek(0)
     with open('Test.docx', 'wb') as f:
         f.write(file_content.read())
-test_Word_functions()
+
+def test_fakturaanalys():
+    with open(os.path.join(os.path.dirname(__file__),'faktura.json'), 'r', encoding='utf-8') as f:
+        js = json.load(f)
+    url = URL + 'fakturaanalys?API_KEY=ABCDEFG'
+    rs = requests.post(url, json.dumps(js), headers={"Content-Type": "application/json"})
+    print(rs.content)
+    js = json.loads(rs.content)
+    with open(os.path.join(os.path.dirname(__file__), js['filename']+'.xlsx'),'wb') as f:
+        f.write(base64.b64decode(js['content']))
+test_fakturaanalys()
